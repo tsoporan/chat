@@ -6,6 +6,23 @@ $(document).ready(function() {
   var nick;
   var channels = {};
 
+
+  function setContainerHeight() {
+    var viewHeight      = $(window).innerHeight(),
+        wrapperOffset   = $('div.wrap').offset().top,
+        footerHeight    = $('footer').height(),
+        leftOver        = 152, // message input + paddings
+        calcHeight      = viewHeight - wrapperOffset - footerHeight - leftOver;
+    $('#channel-containers').css('height', calcHeight);
+  }
+
+  setContainerHeight();
+
+  // Take care of screen resizes for chat window.
+  $(window).on('resize', function() {
+    setContainerHeight();
+  });
+
   // Switch channel on hash change.
   $(window).on('hashchange', function() {
     var channel = location.hash || '#root';

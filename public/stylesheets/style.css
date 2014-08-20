@@ -7,14 +7,6 @@ body {
   border-top: 15px solid #3a3a3a;
   color: #3a3a3a;
 }
-div.wrap {
-  min-height: 100%;
-  margin-bottom: -100px;
-}
-div.wrap:after {
-  content: "";
-  display: block;
-}
 .bold {
   font-weight: bold;
 }
@@ -78,8 +70,9 @@ h2.intro {
   color: #3a3a3a;
 }
 /* Channel styles */
+#channel-containers {
+}
 div.channel {
-  height: 500px;
   margin: 20px 0;
   overflow: auto;
 }
@@ -109,8 +102,5 @@ input[name=send] {
 /* Footer styles */
 footer {
   border-top: 1px solid #e3e3e3;
-  height: 100px;
 }
-div.wrap:after {
-  height: 100px;
-}
+
