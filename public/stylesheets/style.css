@@ -1,0 +1,116 @@
+html,
+body {
+  height: 100%;
+  background: #fafafa;
+}
+body {
+  border-top: 15px solid #3a3a3a;
+  color: #3a3a3a;
+}
+div.wrap {
+  min-height: 100%;
+  margin-bottom: -100px;
+}
+div.wrap:after {
+  content: "";
+  display: block;
+}
+.bold {
+  font-weight: bold;
+}
+.block {
+  display: block;
+}
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+.hidden {
+  display: none;
+}
+.rtext {
+  text-align: right;
+}
+.ltext {
+  text-align: left;
+}
+.ctext {
+  text-align: center;
+}
+.button {
+  background: #ff7200;
+}
+.button:hover {
+  background: #3a3a3a;
+}
+/* Header styles */
+#logo {
+  margin: 0;
+  padding: 0;
+  font-size: 4em;
+  font-family: 'Lobster', cursive;
+  color: #ff7200;
+}
+form.connect {
+  margin: 20px;
+}
+#connect {
+  margin: 0;
+  padding: 10px;
+}
+h2.intro {
+  font-size: 4em;
+  color: #3a3a3a;
+}
+/* Channel list styles */
+#channel-list li {
+  display: inline-block;
+  margin: 0 5px;
+}
+#channels li a {
+  background: #3a3a3a;
+  color: #fafafa;
+}
+#channels li a.channelLink.selected {
+  background: #e3e3e3;
+  color: #3a3a3a;
+}
+/* Channel styles */
+div.channel {
+  height: 500px;
+  margin: 20px 0;
+  overflow: auto;
+}
+/* Message styles */
+#channel-containers .message {
+  border-bottom: 1px solid #e3e3e3;
+  padding: 5px;
+}
+span.timestamp {
+  padding-right: 5px;
+}
+span.nick {
+  padding-left: 5px;
+  border-left: 1px solid #e3e3e3;
+  font-weight: bold;
+}
+span.text {
+  padding-left: 5px;
+}
+.message.system_msg {
+  font-style: italic;
+}
+/* Send form styles */
+input[name=send] {
+  padding: 10px;
+}
+/* Footer styles */
+footer {
+  border-top: 1px solid #e3e3e3;
+  height: 100px;
+}
+div.wrap:after {
+  height: 100px;
+}

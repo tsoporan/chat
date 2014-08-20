@@ -1,0 +1,43 @@
+extends layout
+
+block content
+
+  div.small-12.columns
+      div.row
+        div.small-centered.columns
+          div.row
+            div.small-10.columns
+              h1(id="logo") #chat
+            div.small-2.columns.rtext
+              a(id="connect" data-reveal-id="connectModal", class="button") Connect
+              a(id="disconnect" class="button hidden") Disconnect
+
+              div(id="connectModal", class="reveal-modal radius", data-reveal)
+                    a.close-reveal-modal &#215;
+                    form.connect
+                      input(type="text", placeholder="ex. irc.freenode.net:6667", name="server")
+                      input(type="text", placeholder="ex. ##linux, #gentoo, #archlinux", name="channels")
+                      input(type="text", placeholder="ex. Zaphod_Beeblebrox", name="nickName")
+                      input(type="submit" value="Connect", name="connect", class="button")
+                      p.hidden Connecting ...
+
+          div.row
+            div.small-12.columns.wrap
+
+                div#channels
+                  ul#channel-list.no-bullet
+
+                  div#channel-containers
+                      h2.intro.ctext Lets chat. Connect to get things started!
+
+                form.send.hidden
+                  div.row
+                    div.small-10.columns
+                      input(type="text", placeholder="Write your message here", name="message")
+                    div.small-2.columns.rtext
+                      input(type="submit", value="Send", name="send", class="button")
+
+
+                footer.ctext
+                  p Created with love by @tsoporan.
+
