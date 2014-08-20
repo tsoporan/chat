@@ -71,6 +71,8 @@ h2.intro {
 }
 /* Channel styles */
 #channel-containers {
+    overflow: auto;
+    margin-bottom: 20px;
 }
 div.channel {
   margin: 20px 0;
