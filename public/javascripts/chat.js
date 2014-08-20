@@ -27,7 +27,7 @@ $(document).ready(function() {
   $(window).on('hashchange', function() {
     var channel = location.hash || '#root';
 
-    var channelEl = $('div[data-channel=' + channel + ']');
+    var channelEl = $('div[data-channel="' + channel + '"]');
 
     if (channelEl.length > 0) {
 
@@ -38,7 +38,7 @@ $(document).ready(function() {
       $('#channel-containers div.channel').removeClass('hidden').addClass('hidden');
 
       // Select current channel.
-      $('li[data-channel='+ channel +'] .channelLink').addClass('selected');
+      $('li[data-channel="'+ channel +'"] .channelLink').addClass('selected');
 
       // Show current channel.
       channelEl.removeClass('hidden');
@@ -75,7 +75,7 @@ $(document).ready(function() {
 
     // If no channel is provided send to all channels.
     if (channel) {
-      containers = $('#channel-containers div[data-channel=' + channel + '] ul');
+      containers = $('#channel-containers div[data-channel="' + channel + '"] ul');
     } else {
       containers = $('#channel-containers div ul');
     }
@@ -176,7 +176,7 @@ $(document).ready(function() {
     var channel     = '#root',
         channelHTML = '<div class="channel" data-channel="' + channel + '"><ul class="no-bullet"></ul></div>',
         channelList = $('#channel-list'),
-        linkHTML    = '<li data-channel='+ channel +' class="channel">' +
+        linkHTML    = '<li data-channel="'+ channel +'" class="channel">' +
                       '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
                       '</li>';
 
@@ -235,7 +235,7 @@ $(document).ready(function() {
   socket.on('createChannel', function(data) {
     var channel          = data.channel,
         channelList      = $('#channel-list'),
-        linkHTML         = '<li data-channel='+ channel +' class="channel">' +
+        linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
                            '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
                            '</li>',
         channelContainer = $('#channel-containers'),
