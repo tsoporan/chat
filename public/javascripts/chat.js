@@ -60,7 +60,7 @@ $(document).ready(function() {
         nick       = msgObj.nick,
         msg        = msgObj.msg,
         type       = msgObj.type,
-        when       = msgObj.when,
+        when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
         chan_msgs  = channels[channel].messages,
         containers,
         html;
@@ -143,7 +143,7 @@ $(document).ready(function() {
     var msgObj = {
       msg     : msg,
       nick    : nick,
-      when    : new Date(),
+      when    : moment(),
       channel : channel,
       type    : 'user',
     };
