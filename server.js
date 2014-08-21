@@ -2,6 +2,7 @@ var http       = require('http'),
     app        = require('./app'),
     socketio   = require('socket.io'),
     irc        = require('irc'),
+    moment     = require('moment'),
     httpServer = http.Server(app),
     io         = socketio(httpServer),
     clients    = {};
@@ -16,7 +17,7 @@ function disconnectCleanup (socket) {
     if (user && user.client) {
       user.client.disconnect(function() {
         socket.emit('ircDisconnected', {
-          when : new Date()
+          when : moment()
         });
       });
 
@@ -86,7 +87,7 @@ io.on('connection', function(socket) {
         channel    : channel,
         //allChannels: clients[socket.id].channels,
         nick       : nick,
-        when       : new Date(),
+        when       : moment()
       });
     });
 
@@ -97,7 +98,7 @@ io.on('connection', function(socket) {
         nick    : nick,
         reason  : reason,
         channels: channels,
-        when    : new Date(),
+        when    : moment()
       });
 
     });
@@ -115,7 +116,7 @@ io.on('connection', function(socket) {
       socket.emit('ircPart', {
         channel    : channel,
         allChanenls: clients[socket.id].channels,
-        when       : new Date()
+        when       : moment()
       });
 
     });
@@ -128,7 +129,7 @@ io.on('connection', function(socket) {
         to     : to,
         text   : text,
         message: message,
-        when   : new Date()
+        when   : moment()
       });
 
     });
@@ -156,7 +157,7 @@ io.on('connection', function(socket) {
         server       : client.opt.server,
         port         : client.opt.port,
         motd         : client.motd,
-        when         : new Date()
+        when         : moment()
       });
 
       console.log('clients', clients);
