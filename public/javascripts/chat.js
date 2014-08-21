@@ -191,6 +191,22 @@ $(document).ready(function() {
     $('form.send').fadeIn('slow');
   });
 
+  socket.on('ircMOTD', function(data) {
+    console.log('ircMOTD', data);
+    var motd = data.motd,
+        when = data.when;
+
+    var msgObj = {
+      channel : '#root',
+      msg     : motd,
+      type    : 'system',
+      when    : when,
+    };
+
+    postToChannel(msgObj);
+
+  });
+
   socket.on('ircMessage', function(data) {
     var channel = data.to,
         msg     = data.text,

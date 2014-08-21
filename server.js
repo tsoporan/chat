@@ -135,8 +135,10 @@ io.on('connection', function(socket) {
     });
 
     client.on('motd', function(motd) {
-      console.log('received MOTD', motd);
-
+      socket.emit('ircMOTD', {
+        when : moment(),
+        motd : motd,
+      });
     });
 
     client.connect(function() {
