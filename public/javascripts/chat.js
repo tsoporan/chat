@@ -1,4 +1,4 @@
-$(document).ready(function() {
+jQuery(document).ready(function($) {
 
   var socket = io();
   var connected = false;
@@ -61,17 +61,17 @@ $(document).ready(function() {
         msg        = msgObj.msg,
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
-        chan_msgs  = channels[channel].messages,
+        chanMsgs  = channels[channel].messages,
         containers,
         html;
 
     // Keep a copy of message.
-    if (chan_msgs) {
+    if (chanMsgs) {
       channels[channel].messages.push(msgObj);
     } else {
-      channels[channel]['messages'] = [msgObj];
+      channels[channel].messages = [msgObj];
     }
-    console.log('chan msgs', chan_msgs);
+    console.log('chan msgs', chanMsgs);
 
     // If no channel is provided send to all channels.
     if (channel) {
@@ -164,8 +164,8 @@ $(document).ready(function() {
     var when = data.when;
 
     var msgObj = {
-      channel : "#root",
-      msg     : "Connected to " + data.server + ".",
+      channel : '#root',
+      msg     : 'Connected to ' + data.server + '.',
       type    : 'system',
       when    : when,
     };
@@ -233,7 +233,7 @@ $(document).ready(function() {
     console.log('ircJoin', data);
 
     var channel   = data.channel,
-        msg       = data.nick  + " has joined channel: " + channel,
+        msg       = data.nick  + ' has joined channel: ' + channel,
         when      = data.when;
 
     var msgObj = {
@@ -270,14 +270,14 @@ $(document).ready(function() {
 
   });
 
-  socket.on('ircDisconnected', function() {
+  socket.on('ircDisconnected', function(data) {
     console.log('disconnect received');
     that.connected = false;
     var when = data.when;
     //$('#messages ul').append('<li class="message disconnected">You were disconnected.</li>');
 
     var msgObj = {
-      msg  : "You were disconnected!",
+      msg  : 'You were disconnected!',
       type : 'system',
       when : when,
     };
