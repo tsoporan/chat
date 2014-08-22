@@ -14,12 +14,20 @@ block content
 
               div(id="connectModal", class="reveal-modal radius", data-reveal)
                     a.close-reveal-modal &#215;
-                    form.connect
-                      input(type="text", placeholder="ex. irc.freenode.net:6667", name="server")
-                      input(type="text", placeholder="ex. ##linux, #gentoo, #archlinux", name="channels")
-                      input(type="text", placeholder="ex. Zaphod_Beeblebrox", name="nickName")
-                      input(type="submit" value="Connect", name="connect", class="button")
-                      p.hidden Connecting ...
+                    form(class="connect" data-abide)
+                        div.input-wrapper
+                            label(for="server")
+                                input(type="text", placeholder="ex. irc.freenode.net:6667", name="server", required)
+                            small.error Server name is required!
+                        div.input-wrapper
+                            label(for="channels")
+                                input(type="text", placeholder="ex. ##linux, #gentoo, #archlinux", name="channels", required)
+                            small.error Channel(s) are required!
+                        div.input-wrapper
+                            label(for="nickName")
+                                input(type="text", placeholder="ex. Zaphod_Beeblebrox", name="nickName", required)
+                            small.error A nick name is required!
+                        input(type="submit" value="Connect", name="connect", class="button")
 
           div.row
             div.small-12.columns.wrap
