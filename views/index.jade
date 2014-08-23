@@ -6,15 +6,22 @@ block content
       div.row
         div.small-centered.columns
           div.row
-            div.small-10.columns
-              h1(id="logo") #chat
-            div.small-2.columns.rtext
-              a(id="connect" data-reveal-id="connectModal", class="button") Connect
-              a(id="disconnect" class="button hidden") Disconnect
+            div.fixed
+              nav(class="top-bar", data-topbar, role="navigation")
+                ul.title-area
+                  li.name
+                    h1#logo #chat
+
+                section.top-bar-section
+                  ul.right
+                    li
+                      a(id="connect" data-reveal-id="connectModal") Connect
+                    li.has-dropdown
 
               div(id="connectModal", class="reveal-modal radius", data-reveal)
                     a.close-reveal-modal &#215;
-                    form(class="connect" data-abide)
+                    h3.ctext Connect
+                    form(class="connect" data-abide="ajax")
                         div.input-wrapper
                             label(for="server")
                                 input(type="text", placeholder="ex. irc.freenode.net:6667", name="server", required)
@@ -27,9 +34,18 @@ block content
                             label(for="nickName")
                                 input(type="text", placeholder="ex. Zaphod_Beeblebrox", name="nickName", required)
                             small.error A nick name is required!
-                        input(type="submit" value="Connect", name="connect", class="button")
+                        input(type="submit" value="Connect", name="connect", class="button radius")
 
           div.row
+            div.small-4.small-centered.columns.fixed.alert-container
+                div(class="alert-box warning ctext connecting radius", data-alert)
+                  span.alert-text Connecting ...
+                  a.close &times;
+
+                div(class="alert-box success ctext connected radius", data-alert)
+                  span.alert-text Connected!
+                  a.close &times;
+
             div.small-12.columns.wrap
                 div#channels
                   ul#channel-list.no-bullet

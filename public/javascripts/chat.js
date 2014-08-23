@@ -2,10 +2,8 @@ jQuery(document).ready(function($) {
 
   var socket = io();
   var connected = false;
-  var that = this;
   var nick;
   var channels = {};
-
 
   function setContainerHeight() {
     var viewHeight      = $(window).innerHeight(),
@@ -106,7 +104,7 @@ jQuery(document).ready(function($) {
   });
 
   // Connecting to IRC from web.
-  $('form.connect').submit(function() {
+  $('form.connect').on('valid.fndtn.abide', function() {
     var server   = $('input[name=server]').val(),
         channels = $('input[name=channels]').val();
 
@@ -117,6 +115,12 @@ jQuery(document).ready(function($) {
       channels: channels,
       nick    : nick
     });
+
+    $('a.close-reveal-modal').click();
+
+    setTimeout(function() {
+      $('.alert-box.connecting').show();
+    }, 500);
 
     return false;
   });
@@ -155,20 +159,36 @@ jQuery(document).ready(function($) {
 
   socket.on('ircConnected', function(data) {
     console.log('info received', data);
-    $('form.connect p').addClass('hidden');
-    $('#connect-dialog').dialog('close');
 
-    that.connected = true;
-    that.nick      = data.nick;
+    connected = true;
+    nick      = data.nick;
 
-    var when = data.when;
+    var when         = data.when,
+        server       = data.server,
+        serverMsg    = data.serverMsg,
+        clientsCount = data.clientsCount;
 
     var msgObj = {
       channel : '#root',
-      msg     : 'Connected to ' + data.server + '.',
+      msg     : serverMsg,
       type    : 'system',
       when    : when,
     };
+
+    // Hide alerts.
+    $('.alert-box.connecting').hide();
+    setTimeout(function() {
+      $('.alert-box.connected').show();
+    }, 500);
+
+    // Hide the connect and show the user menu.
+    $('#connect').addClass('hidden');
+
+    var menuHTML = '<a>Hi, ' + nick + '</a>' +
+                   '<ul class="dropdown">'+
+                   '<li><a id="disconnect">Disconnect</a></li>' +
+                   '</ul>';
+    $('.top-bar-section li.has-dropdown').append(menuHTML);
 
     console.log('msgObj', msgObj);
 

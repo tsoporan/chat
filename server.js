@@ -141,24 +141,30 @@ io.on('connection', function(socket) {
       });
     });
 
-    client.connect(function() {
+    client.connect(function(welcome) {
       console.log('IRC CLIENT CONNECTED FOR: ', socket.id);
+      var server,
+          serverMsg,
+          nick;
 
-      console.log('ARGS', arguments);
+      server     = welcome.server;
+      nick       = welcome.args[0];
+      serverMsg  = welcome.args[1];
+
       // Store client
       clients[client.opt.nick] = {
         socket: socket,
         client: client,
       }
+
       socket.nick = client.opt.nick;
 
       // Emit the client info to the web client.
       socket.emit('ircConnected', {
         clientsCount : Object.keys(clients).length,
-        nick         : client.opt.nick, // TODO: might not be the nick
-        server       : client.opt.server,
-        port         : client.opt.port,
-        motd         : client.motd,
+        server       : server,
+        serverMsg    : serverMsg,
+        nick         : nick,
         when         : moment()
       });
 

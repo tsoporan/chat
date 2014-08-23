@@ -8,18 +8,8 @@ html, body {
   background: @white;
 }
 body {
-  border-top: 15px solid @dgrey;
   color: @dgrey;
 }
-div.wrap {
-  min-height: 100%;
-  margin-bottom: -100px;
-}
-div.wrap:after {
-  content: "";
-  display: block;
-}
-
 .bold {
   font-weight: bold;
 }
@@ -31,6 +21,9 @@ div.wrap:after {
 }
 .right {
   float: right;
+}
+.top-bar-section ul li > a.hidden {
+  display: none;
 }
 .hidden {
   display: none;
@@ -50,13 +43,20 @@ div.wrap:after {
 .button:hover {
   background: @dgrey;
 }
-
+.button:focus {
+  background: @lgrey;
+}
+.alert-box {
+  display: none;
+}
+.alert-text {
+  font-size: 1.2em;
+}
 /* Header styles */
-
 #logo {
   margin: 0;
   padding: 0;
-  font-size: 4em;
+  font-size: 3em;
   font-family: 'Lobster', cursive;
   color: @orange;
 }
@@ -64,18 +64,18 @@ div.wrap:after {
 form.connect {
   margin: 20px;
 }
-#connect {
-  margin: 0;
-  padding: 10px;
-}
-
 h2.intro {
   font-size: 4em;
   color: @dgrey;
 }
-
+.alert-container {
+  margin: 30px 0;
+}
 
 /* Channel list styles */
+#channel-list {
+  margin-top: 20px;
+}
 #channel-list li {
   display: inline-block;
   margin: 0 5px;
@@ -88,7 +88,6 @@ h2.intro {
   background: @lgrey;
   color: @dgrey;
 }
-
 /* Channel styles */
 div.channel {
   height: 500px;
@@ -120,7 +119,6 @@ span.text {
 input[name=send] {
   padding: 10px;
 }
-
 /* Footer styles */
 footer {
   border-top: 1px solid @lgrey;
