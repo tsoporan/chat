@@ -37,13 +37,17 @@ block content
                         input(type="submit" value="Connect", name="connect", class="button radius")
 
           div.row
-            div.small-4.small-centered.columns.fixed.alert-container
+            div.small-3.small-centered.columns.fixed.alert-container
                 div(class="alert-box warning ctext connecting radius", data-alert)
                   span.alert-text Connecting ...
                   a.close &times;
 
                 div(class="alert-box success ctext connected radius", data-alert)
-                  span.alert-text Connected!
+                  span.alert-text Client connected!
+                  a.close &times;
+
+                div(class="alert-box error ctext connected radius", data-alert)
+                  span.alert-text Disconnected, re-connect to continue chatting.
                   a.close &times;
 
             div.small-12.columns.wrap

@@ -326,6 +326,8 @@ jQuery(document).ready(function($) {
 
     postToChannel(msgObj);
 
+    $('.alert-box.disconnected').show();
+
   });
 
   socket.on('error', function() {

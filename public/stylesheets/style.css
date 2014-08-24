@@ -66,6 +66,11 @@ h2.intro {
 .alert-container {
   margin: 30px 0;
 }
+.alert-container.fixed {
+  width: 40%;
+  left: 0;
+  right: 0;
+}
 /* Channel list styles */
 #channel-list {
   margin-top: 20px;
