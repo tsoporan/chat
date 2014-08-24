@@ -141,6 +141,17 @@ io.on('connection', function(socket) {
       });
     });
 
+    client.on('names', function(channel, nicks) {
+      console.log('names', channel, nicks);
+
+      socket.emit('ircNames', {
+        channel : channel,
+        nicks   : nicks,
+        when    : moment(),
+      });
+
+    });
+
     client.connect(function(welcome) {
       console.log('IRC CLIENT CONNECTED FOR: ', socket.id);
       var server,
@@ -190,6 +201,4 @@ io.on('connection', function(socket) {
 
 });
 
-httpServer.listen(app.get('port'), function() {
-  console.log("Server listening on port: " + app.get('port'));
-});
+module.exports = httpServer
