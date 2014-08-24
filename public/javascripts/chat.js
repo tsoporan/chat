@@ -50,13 +50,30 @@ jQuery(document).ready(function($) {
     });
   }
 
+
+  // Escape HTML from: https://github.com/janl/mustache.js/blob/master/mustache.js#L43
+  var entityMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
+  };
+
+  function escapeHTML(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return entityMap[s];
+    });
+  }
+
   function postToChannel(msgObj) {
 
     console.log('post to channel', msgObj);
 
     var channel    = msgObj.channel,
         nick       = msgObj.nick,
-        msg        = msgObj.msg,
+        msg        = escapeHTML(msgObj.msg),
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
         chanMsgs  = channels[channel].messages,
@@ -94,6 +111,11 @@ jQuery(document).ready(function($) {
       default:
         break;
     }
+
+    // Keep scroll at bottom of channel window.
+    var scrollArea = $('div.channel[data-channel="' + channel + '"]');
+    var scrollTop  = $('div.channel[data-channel="' + channel + '"]')[0].scrollHeight;
+    scrollArea.animate({'scrollTop': scrollTop}, 'slow');
 
   }
 
