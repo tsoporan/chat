@@ -12,7 +12,7 @@ function disconnectCleanup (socket) {
 
   var _disconnect = function () {
 
-    var user = clients[socket.nick];
+    var user = clients[socket.id]
 
     if (user && user.client) {
       user.client.disconnect(function() {
@@ -21,8 +21,8 @@ function disconnectCleanup (socket) {
         });
       });
 
-      delete clients[socket.nick];
-      console.log('User disconnected: ' +  socket.nick);
+      delete clients[socket.id];
+      console.log('User disconnected: ' +  socket.id);
     }
   };
 
@@ -32,6 +32,7 @@ function disconnectCleanup (socket) {
 // On connection store the socket and newly created client
 io.on('connection', function(socket) {
     console.log('Socket connected: ' + socket.id);
+    console.log('clients', clients.length);
 
     socket.on('disconnect', disconnectCleanup(socket));
     socket.on('disconnectIRC', disconnectCleanup(socket));
@@ -42,6 +43,16 @@ io.on('connection', function(socket) {
           channels = data.channels,
           nick     = data.nick;
 
+      // Check for duplicate connections for client.
+      exists = clients[socket.id];
+      if (exists) {
+        socket.emit('systemMessage', {
+          type : 'error',
+          msg  : 'This client is already connected!',
+          when : moment()
+        });
+        return false;
+      }
 
       console.log("in connect to irc", data);
 
@@ -63,23 +74,29 @@ io.on('connection', function(socket) {
     client.on('error', function(err) {
       // Error handling.
       console.log('IRC CLIENT ERROR: ', err);
+
+      socket.emit('ircError', {
+        msg  : err.args[1],
+        when : moment(),
+      });
+
     });
 
     client.on('join', function(channel, nick, message) {
       console.log('CLIENT JOINED CHANNEL:', channel);
 
       // Keep track of channels joined for web clients.
-      var client = clients[nick];
+      var client = clients[socket.id];
 
       if (client) {
-        // We want to create a channel client side if we're the ones joining.
+        // We want to create a channel client side if a socket user is joining.
         socket.emit('createChannel', {
           channel : channel,
         });
-        if (clients[nick].channels) {
-            clients[nick].channels.push(channel);
+        if (client.channels) {
+            client.channels.push(channel);
         } else {
-          clients[nick].channels = [channel];
+          client.channels = [channel];
         }
       }
 
@@ -163,12 +180,10 @@ io.on('connection', function(socket) {
       serverMsg  = welcome.args[1];
 
       // Store client
-      clients[client.opt.nick] = {
+      clients[socket.id] = {
         socket: socket,
         client: client,
       }
-
-      socket.nick = client.opt.nick;
 
       // Emit the client info to the web client.
       socket.emit('ircConnected', {
