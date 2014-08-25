@@ -3,12 +3,27 @@ var gulp   = require('gulp'),
     uglify = require('gulp-uglify'),
     concat = require('gulp-concat'),
     rename = require('gulp-rename'),
-    gutil  = require('gulp-util');
+    gutil  = require('gulp-util'),
+    less   = require('gulp-less'),
+    minify = require('gulp-minify-css');
 
 gulp.task('clean', function() {
-    return gulp.src('public/javascripts/build', {read: false})
+    return gulp.src(['public/javascripts/build', 'public/stylesheets/build'], {read: false})
     .pipe(clean());
 
+});
+
+gulp.task('less', function() {
+  gulp.src('public/stylesheets/*.less')
+  .pipe(less())
+  .pipe(gulp.dest('public/stylesheets/'));
+});
+
+gulp.task('css', function() {
+  gulp.src(['public/stylesheets/vendor/**/*.css', 'public/stylesheets/*.css'])
+  .pipe(minify())
+  .pipe(concat('build.min.css'))
+  .pipe(gulp.dest('public/stylesheets/build/'));
 });
 
 gulp.task('js', function() {
@@ -30,4 +45,4 @@ gulp.task('js', function() {
 });
 
 
-gulp.task('default', ['clean', 'js']);
+gulp.task('default', ['clean', 'less', 'css', 'js']);
