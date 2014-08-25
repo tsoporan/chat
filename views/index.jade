@@ -38,17 +38,6 @@ block content
 
           div.row
             div.small-3.small-centered.columns.fixed.alert-container
-                div(class="alert-box warning ctext connecting radius", data-alert)
-                  span.alert-text Connecting ...
-                  a.close &times;
-
-                div(class="alert-box success ctext connected radius", data-alert)
-                  span.alert-text Client connected!
-                  a.close &times;
-
-                div(class="alert-box alert ctext disconnected radius", data-alert)
-                  span.alert-text Disconnected, re-connect to continue chatting.
-                  a.close &times;
 
             div.small-12.columns.wrap
                 div#channels
@@ -56,6 +45,18 @@ block content
 
                   div#channel-containers
                       h2.intro.ctext Lets chat. Connect to get things started!
+
+                      p.ctext First time? Choose from some of these networks:
+
+                      ul.popular-networks
+                        li
+                          a hashbang
+                        li
+                          a freenode
+                        li
+                          a quakenet
+                        li
+                          a efnet
 
                 form.send.hidden
                   div.row.collapse

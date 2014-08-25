@@ -50,7 +50,6 @@ jQuery(document).ready(function($) {
     });
   }
 
-
   // Escape HTML from: https://github.com/janl/mustache.js/blob/master/mustache.js#L43
   var entityMap = {
     "&": "&amp;",
@@ -67,6 +66,28 @@ jQuery(document).ready(function($) {
     });
   }
 
+  function createAlert(opts) {
+    console.log('creating Alert', opts);
+    var msg       = opts.msg,
+        level     = opts.level,
+        label     = opts.label,
+        container = $('.alert-container'),
+        html;
+
+    html = '<div data-alert class="alert-box ctext radius ' + level + ' ' + label + '">' +
+           '<span class="alert-text">' + msg + '</span>' +
+           '<a class="close">&times;</a>' +
+           '</div>';
+
+    container.append(html).foundation();
+
+    $('.alert-box.' + label).show();
+  }
+
+  function closeAlert(label) {
+    $('.alert-box.'+label).remove();
+  }
+
   function postToChannel(msgObj) {
 
     console.log('post to channel', msgObj);
@@ -76,21 +97,22 @@ jQuery(document).ready(function($) {
         msg        = escapeHTML(msgObj.msg),
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
-        chanMsgs  = channels[channel].messages,
+        chanMsgs,
         containers,
         html;
 
-    // Keep a copy of message.
-    if (chanMsgs) {
-      channels[channel].messages.push(msgObj);
-    } else {
-      channels[channel].messages = [msgObj];
-    }
-    console.log('chan msgs', chanMsgs);
-
     // If no channel is provided send to all channels.
     if (channel) {
+      // Keep a copy of message.
+      chanMsgs = channels[channel].messages;
+      if (chanMsgs) {
+         channels[channel].messages.push(msgObj);
+      } else {
+         channels[channel].messages = [msgObj];
+      }
+
       containers = $('#channel-containers div[data-channel="' + channel + '"] ul');
+
     } else {
       containers = $('#channel-containers div ul');
     }
@@ -114,16 +136,12 @@ jQuery(document).ready(function($) {
 
     // Keep scroll at bottom of channel window.
     var scrollArea = $('div.channel[data-channel="' + channel + '"]');
-    var scrollTop  = $('div.channel[data-channel="' + channel + '"]')[0].scrollHeight;
-    scrollArea.animate({'scrollTop': scrollTop}, 'slow');
+    if (scrollArea.length > 0) {
+      var scrollTop  = scrollArea[0].scrollHeight;
+      scrollArea.animate({'scrollTop': scrollTop}, 'slow');
+    }
 
   }
-
-  $('#disconnect').on('click', function(e) {
-    console.log('disconnect clicked');
-    socket.emit('disconnectIRC');
-    return false;
-  });
 
   // Connecting to IRC from web.
   $('form.connect').on('valid.fndtn.abide', function() {
@@ -140,8 +158,9 @@ jQuery(document).ready(function($) {
 
     $('a.close-reveal-modal').click();
 
+    closeAlert('disconnected');
     setTimeout(function() {
-      $('.alert-box.connecting').show();
+      createAlert({ msg: 'Connecting ...', level: 'warning', label: 'connecting'});
     }, 500);
 
     return false;
@@ -197,10 +216,14 @@ jQuery(document).ready(function($) {
       when    : when,
     };
 
+    // Empty out initial content.
+    $('#channel-list').empty();
+    $('#channel-containers').empty();
+
     // Hide alerts.
-    $('.alert-box.connecting').hide();
+    $('.alert-box.connecting').remove();
     setTimeout(function() {
-      $('.alert-box.connected').show();
+      createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
     }, 500);
 
     // Hide the connect and show the user menu.
@@ -211,6 +234,11 @@ jQuery(document).ready(function($) {
                    '<li><a id="disconnect">Disconnect</a></li>' +
                    '</ul>';
     $('.top-bar-section li.has-dropdown').append(menuHTML);
+
+    $('#disconnect').on('click', function() {
+      socket.emit('disconnectIRC');
+      return false;
+    });
 
     console.log('msgObj', msgObj);
 
@@ -223,7 +251,7 @@ jQuery(document).ready(function($) {
                       '</li>';
 
     channelList.append(linkHTML);
-    $('#channel-containers h2').remove();
+
     $('#channel-containers').append(channelHTML);
     channels['#root'] = {};
 
@@ -286,7 +314,26 @@ jQuery(document).ready(function($) {
       when    : when,
     };
 
+    var exists = channel in channels;
+    if (!exists) {
+      channels[channel] = {};
+    }
+    console.log('ircJoin channels', channels);
+
     postToChannel(msgObj);
+
+    window.location.hash = channel;
+
+    closeAlert('connected');
+
+  });
+
+  socket.on('ircNames', function(data) {
+    var channel = data.channel,
+        nicks   = data.nicks,
+        when    = data.when;
+
+   console.log('ircNames', data);
 
   });
 
@@ -314,9 +361,9 @@ jQuery(document).ready(function($) {
 
   socket.on('ircDisconnected', function(data) {
     console.log('disconnect received');
-    that.connected = false;
+    connected = false;
+
     var when = data.when;
-    //$('#messages ul').append('<li class="message disconnected">You were disconnected.</li>');
 
     var msgObj = {
       msg  : 'You were disconnected!',
@@ -326,12 +373,32 @@ jQuery(document).ready(function($) {
 
     postToChannel(msgObj);
 
-    $('.alert-box.disconnected').show();
+    createAlert({ msg: 'Disconnected! Reconnect to continue chatting.', level : 'alert', label: 'disconnected' })
 
+    // Remove user menu and show connect.
+    $('li.has-dropdown').empty();
+    $('#connect').removeClass('hidden');
+
+  });
+
+  socket.on('systemMessage', function(data) {
+    var msg  = data.msg,
+        type = data.type,
+        when = data.when;
+    console.log('*** sysMessage: ', msg, type, when);
+  });
+
+  socket.on('ircError', function(data) {
+    var msg  = data.msg,
+        when = data.when;
+
+    console.log('*** ircError: ', msg, when);
   });
 
   socket.on('error', function() {
     console.log('error', arguments);
   });
 
+
+  $(document).foundation();
 });
