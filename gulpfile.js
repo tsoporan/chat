@@ -14,13 +14,13 @@ gulp.task('clean', function() {
 });
 
 gulp.task('less', function() {
-  gulp.src('public/stylesheets/*.less')
+  return gulp.src('public/stylesheets/*.less')
   .pipe(less())
   .pipe(gulp.dest('public/stylesheets/'));
 });
 
 gulp.task('css', function() {
-  gulp.src(['public/stylesheets/vendor/**/*.css', 'public/stylesheets/*.css'])
+  return gulp.src(['public/stylesheets/vendor/**/*.css', 'public/stylesheets/*.css'])
   .pipe(minify())
   .pipe(concat('build.min.css'))
   .pipe(gulp.dest('public/stylesheets/build/'));
