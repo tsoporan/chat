@@ -1,9 +1,10 @@
 jQuery(document).ready(function($) {
 
-  var socket = io();
-  var connected = false;
-  var nick;
-  var channels = {};
+  var socket    = io(),
+      connected = false,
+      channels  = {},
+      nickCache = {},
+      nick;
 
   function setContainerHeight() {
     var viewHeight      = $(window).innerHeight(),
@@ -66,6 +67,32 @@ jQuery(document).ready(function($) {
     });
   }
 
+  function getColor() {
+
+      // Black reserved for current user.
+      var colors  = [
+        'blue',
+        'green',
+        'red',
+        'brown',
+        'purple',
+        'orange',
+        'yellow',
+        'light_green',
+        'teal',
+        'light_cyan',
+        'light_blue',
+        'pink',
+        'grey',
+        'light_grey'
+      ];
+
+
+      // Return a randomized color.
+      return colors[Math.floor(Math.random() * colors.length - 1)];
+
+  }
+
   function createAlert(opts) {
     console.log('creating Alert', opts);
     var msg       = opts.msg,
@@ -97,9 +124,14 @@ jQuery(document).ready(function($) {
         msg        = escapeHTML(msgObj.msg),
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
+        color      = 'none',
         chanMsgs,
         containers,
         html;
+
+    if (nickCache[nick]) {
+      color = nickCache[nick].color;
+    }
 
     // If no channel is provided send to all channels.
     if (channel) {
@@ -126,7 +158,7 @@ jQuery(document).ready(function($) {
       case 'user':
         html = '<li class="message '+ type +'" data-to="' + channel +  '">' +
                '<span class="timestamp">' + when + '</span>' +
-               '<span class="nick">' + nick + '</span>: <span class="text">' + msg + '</span></li>';
+               '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + msg + '</span></li>';
         appendHTML(containers, html);
         break;
 
@@ -194,6 +226,13 @@ jQuery(document).ready(function($) {
     };
 
     postToChannel(msgObj);
+
+    var cached = nickCache[nick];
+    if (!cached) {
+      nickCache[nick] = {
+        color: 'black',
+      };
+    }
 
     return false;
   });
@@ -293,6 +332,13 @@ jQuery(document).ready(function($) {
       type      : 'user',
     };
 
+    cached = nick in nickCache;
+    if (!cached) {
+      nickCache[nick] = {
+        color: getColor(),
+      };
+    }
+
     postToChannel(msgObj);
 
     console.log('channel messages', channels[channel].messages);
@@ -338,7 +384,7 @@ jQuery(document).ready(function($) {
 
    for (var nick in nicks) {
     var mode = nicks[nick];
-    var nickHTML = '<li class="nick rtext"><span class="mode">' + mode + '</span> ' + nick + '</li>'
+    var nickHTML = '<li class="nick rtext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
     nameContainer.append(nickHTML);
    }
 
@@ -412,7 +458,7 @@ jQuery(document).ready(function($) {
 
     postToChannel(msgObj);
 
-    createAlert({ msg: 'Disconnected! Reconnect to continue chatting.', level : 'alert', label: 'disconnected' })
+    createAlert({ msg: 'Disconnected! Reconnect to continue chatting.', level : 'alert', label: 'disconnected' });
 
     // Remove user menu and show connect.
     $('li.has-dropdown').empty();

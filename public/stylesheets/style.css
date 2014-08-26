@@ -1,3 +1,49 @@
+.color_none,
+.color_black {
+  color: #000000;
+}
+.color_blue {
+  color: #0068b9;
+}
+.color_green {
+  color: #20ca00;
+}
+.color_red {
+  color: #f73d3d;
+}
+.color_brown {
+  color: #86611e;
+}
+.color_purple {
+  color: #7f27cf;
+}
+.color_orange {
+  color: #ffa12a;
+}
+.color_yellow {
+  color: #f8c318;
+}
+.color_light_green {
+  color: #61dd00;
+}
+.color_teal {
+  color: #19dd97;
+}
+.color_light_cyan {
+  color: #23e6b7;
+}
+.color_light_blue {
+  color: #7ddcfa;
+}
+.color_pink {
+  color: #ff7ccb;
+}
+.color_grey {
+  color: #a5a5a5;
+}
+.color_light_grey {
+  color: #c9c9c9;
+}
 html,
 body {
   height: 100%;
