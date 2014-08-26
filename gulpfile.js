@@ -5,7 +5,8 @@ var gulp   = require('gulp'),
     rename = require('gulp-rename'),
     gutil  = require('gulp-util'),
     less   = require('gulp-less'),
-    minify = require('gulp-minify-css');
+    minify = require('gulp-minify-css'),
+    hint   = require('gulp-jshint');
 
 gulp.task('clean', function() {
     return gulp.src(['public/javascripts/build', 'public/stylesheets/build'], {read: false})
@@ -24,6 +25,12 @@ gulp.task('css', function() {
   .pipe(minify())
   .pipe(concat('build.min.css'))
   .pipe(gulp.dest('public/stylesheets/build/'));
+});
+
+gulp.task('lint', function() {
+  return gulp.src('public/javascripts/*.js')
+  .pipe(hint())
+  .pipe(hint.reporter('default'));
 });
 
 gulp.task('js', function() {
