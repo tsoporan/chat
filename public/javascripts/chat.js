@@ -89,7 +89,7 @@ jQuery(document).ready(function($) {
 
 
       // Return a randomized color.
-      return colors[Math.floor(Math.random() * colors.length - 1)];
+      return colors[Math.floor(Math.random() * (colors.length - 1))];
 
   }
 
@@ -113,6 +113,20 @@ jQuery(document).ready(function($) {
 
   function closeAlert(label) {
     $('.alert-box.'+label).remove();
+  }
+
+  function addToNames(nickObj) {
+    console.log('add to names', nickObj);
+
+    var channel        = nickObj.channel,
+        nick           = nickObj.nick,
+        mode           = '',
+        nickHTML       = '',
+        nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul');
+
+    nickHTML = '<li class="nick rtext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+    nameContainer.append(nickHTML);
+
   }
 
   function postToChannel(msgObj) {
@@ -349,7 +363,8 @@ jQuery(document).ready(function($) {
     console.log('ircJoin', data);
 
     var channel   = data.channel,
-        msg       = data.nick  + ' has joined channel: ' + channel,
+        nick      = data.nick,
+        msg       = nick  + ' has joined channel: ' + channel,
         when      = data.when;
 
     var msgObj = {
@@ -366,9 +381,8 @@ jQuery(document).ready(function($) {
     }
     console.log('ircJoin channels', channels);
 
+    addToNames({ nick: nick, channel: channel });
     postToChannel(msgObj);
-
-    window.location.hash = channel;
 
     closeAlert('connected');
 
@@ -415,6 +429,8 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('createChannel', function(data) {
+    console.log('createChannel', data);
+
     var channel          = data.channel,
         channelList      = $('#channel-list'),
         linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
@@ -432,16 +448,20 @@ jQuery(document).ready(function($) {
                            '</div>';
 
     channels[channel] = {};
-    console.log('channels', channels);
 
     channelList.append(linkHTML);
     channelContainer.append(channelHTML);
 
+    window.location.hash = channel;
   });
 
   socket.on('ircPart', function(data) {
     console.log('ircPart', data);
 
+  });
+
+  socket.on('ircQuit', function(data) {
+    console.log('ircQuit', data);
   });
 
   socket.on('ircDisconnected', function(data) {

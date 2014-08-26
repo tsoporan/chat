@@ -88,7 +88,7 @@ io.on('connection', function(socket) {
       // Keep track of channels joined for web clients.
       var client = clients[socket.id];
 
-      if (client) {
+      if (nick === client.nick) {
         // We want to create a channel client side if a socket user is joining.
         socket.emit('createChannel', {
           channel : channel,
@@ -98,14 +98,14 @@ io.on('connection', function(socket) {
         } else {
           client.channels = [channel];
         }
+      } else {
+        socket.emit('ircJoin', {
+          channel    : channel,
+          //allChannels: clients[socket.id].channels,
+          nick       : nick,
+          when       : moment()
+        });
       }
-
-      socket.emit('ircJoin', {
-        channel    : channel,
-        //allChannels: clients[socket.id].channels,
-        nick       : nick,
-        when       : moment()
-      });
     });
 
     client.on('quit', function(nick, reason, channels, message) {
@@ -195,6 +195,7 @@ io.on('connection', function(socket) {
       clients[socket.id] = {
         socket: socket,
         client: client,
+        nick  : nick,
       }
 
       // Emit the client info to the web client.
