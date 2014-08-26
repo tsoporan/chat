@@ -124,3 +124,18 @@ footer {
 div.wrap:after {
   height: 100px;
 }
+/* Names sidebar styles */
+li.nick {
+  font-weight: bold;
+}
+li.nick .mode {
+  color: #ff7200;
+}
+/* Topic styles */
+div.topic {
+  padding: 5px;
+  margin-bottom: 10px;
+  min-height: 10px;
+  background: #e3e3e3;
+  font-weight: bold;
+}

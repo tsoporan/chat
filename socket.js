@@ -169,6 +169,18 @@ io.on('connection', function(socket) {
 
     });
 
+    client.on('topic', function(channel, topic, nick, message) {
+      console.log('topic', channel, topic, nick, message);
+
+      socket.emit('ircTopic', {
+        channel : channel,
+        topic   : topic,
+        nick    : nick,
+        message : message,
+        when    : moment(),
+      });
+    });
+
     client.connect(function(welcome) {
       console.log('IRC CLIENT CONNECTED FOR: ', socket.id);
       var server,

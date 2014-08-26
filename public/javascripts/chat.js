@@ -111,7 +111,7 @@ jQuery(document).ready(function($) {
          channels[channel].messages = [msgObj];
       }
 
-      containers = $('#channel-containers div[data-channel="' + channel + '"] ul');
+      containers = $('#channel-containers div[data-channel="' + channel + '"] div.messages ul');
 
     } else {
       containers = $('#channel-containers div ul');
@@ -244,7 +244,7 @@ jQuery(document).ready(function($) {
 
     // Add the root channel.
     var channel     = '#root',
-        channelHTML = '<div class="channel" data-channel="' + channel + '"><ul class="no-bullet"></ul></div>',
+        channelHTML = '<div class="channel" data-channel="' + channel + '"><div class="messages"><ul class="no-bullet"></ul></div></div>',
         channelList = $('#channel-list'),
         linkHTML    = '<li data-channel="'+ channel +'" class="channel">' +
                       '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
@@ -329,12 +329,43 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('ircNames', function(data) {
-    var channel = data.channel,
-        nicks   = data.nicks,
-        when    = data.when;
+    var channel       = data.channel,
+        nicks         = data.nicks,
+        when          = data.when,
+        nameContainer = $('div.channel[data-channel="' + channel + '"] div.names ul');
 
    console.log('ircNames', data);
 
+   for (var nick in nicks) {
+    var mode = nicks[nick];
+    var nickHTML = '<li class="nick rtext"><span class="mode">' + mode + '</span> ' + nick + '</li>'
+    nameContainer.append(nickHTML);
+   }
+
+  });
+
+  socket.on('ircTopic', function(data) {
+    var channel        = data.channel,
+        topic          = data.topic,
+        nick           = data.nick,
+        when           = data.when,
+        rawMsg         = data.message,
+        topicContainer =  $('div.channel[data-channel="'+ channel +'"] div.topic');
+
+    console.log('ircTopic', data);
+    topicContainer.empty();
+    topicContainer.append('<span>' + topic + '</span>');
+
+    if (rawMsg.command === 'TOPIC') { // User called
+      var msgObj = {
+        channel: channel,
+        msg    : nick + ' changed the topic to: ' + topic,
+        type   : 'system',
+        when   : when,
+      };
+
+      postToChannel(msgObj);
+    }
   });
 
   socket.on('createChannel', function(data) {
@@ -344,7 +375,15 @@ jQuery(document).ready(function($) {
                            '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
                            '</li>',
         channelContainer = $('#channel-containers'),
-        channelHTML      = '<div class="channel hidden" data-channel="' + channel + '"><ul class="no-bullet"></ul></div>';
+        channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">'+
+                             '<div class="topic"></div>' +
+                             '<div class="small-9 columns messages">' +
+                             '<ul class="no-bullet"></ul>' +
+                             '</div>' +
+                             '<div class="small-3 columns names">' +
+                             '<ul class="no-bullet"></ul>' +
+                             '</div>' +
+                           '</div>';
 
     channels[channel] = {};
     console.log('channels', channels);
