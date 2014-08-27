@@ -113,7 +113,8 @@ jQuery(document).ready(function($) {
   }
 
   function closeAlert(label) {
-    $('.alert-box.' + label + ' .close').click();
+    var el = $('.alert-box.' + label + ' .close');
+    el.click();
   }
 
   function addToNames(nickObj) {
@@ -206,9 +207,7 @@ jQuery(document).ready(function($) {
     $('a.close-reveal-modal').click();
 
     closeAlert('disconnected');
-    setTimeout(function() {
-      createAlert({ msg: 'Connecting ...', level: 'warning', label: 'connecting'});
-    }, 500);
+    createAlert({ msg: 'Connecting ...', level: 'warning', label: 'connecting'});
 
     return false;
   });
@@ -276,9 +275,7 @@ jQuery(document).ready(function($) {
 
     // Close connecting show connected.
     closeAlert('connecting');
-    setTimeout(function() {
-      createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
-    }, 500);
+    createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
 
     // Hide the connect and show the user menu.
     $('#connect').addClass('hidden');
@@ -432,6 +429,7 @@ jQuery(document).ready(function($) {
 
   socket.on('createChannel', function(data) {
     console.log('createChannel', data);
+    closeAlert('connected');
 
     var channel          = data.channel,
         channelList      = $('#channel-list'),

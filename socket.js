@@ -32,7 +32,6 @@ function disconnectCleanup (socket) {
 // On connection store the socket and newly created client
 io.on('connection', function(socket) {
     console.log('Socket connected: ' + socket.id);
-    console.log('clients', clients.length);
 
     socket.on('disconnect', disconnectCleanup(socket));
     socket.on('disconnectIRC', disconnectCleanup(socket));
