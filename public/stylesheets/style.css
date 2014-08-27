@@ -27,7 +27,7 @@
   color: #61dd00;
 }
 .color_teal {
-  color: #19dd97;
+  color: #00ac90;
 }
 .color_light_cyan {
   color: #23e6b7;
@@ -184,4 +184,7 @@ div.topic {
   min-height: 10px;
   background: #e3e3e3;
   font-weight: bold;
+}
+div.topic span {
+  font-style: italic;
 }

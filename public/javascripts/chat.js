@@ -410,11 +410,11 @@ jQuery(document).ready(function($) {
         nick           = data.nick,
         when           = data.when,
         rawMsg         = data.message,
-        topicContainer =  $('div.channel[data-channel="'+ channel +'"] div.topic');
+        topicContainer =  $('div.channel[data-channel="'+ channel +'"] div.topic span');
 
     console.log('ircTopic', data);
     topicContainer.empty();
-    topicContainer.append('<span>' + topic + '</span>');
+    topicContainer.append(topic);
 
     if (rawMsg.command === 'TOPIC') { // User called
       var msgObj = {
@@ -438,7 +438,7 @@ jQuery(document).ready(function($) {
                            '</li>',
         channelContainer = $('#channel-containers'),
         channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">'+
-                             '<div class="topic"></div>' +
+                             '<div class="topic">Topic: <span></span></div>' +
                              '<div class="small-9 columns messages">' +
                              '<ul class="no-bullet"></ul>' +
                              '</div>' +
