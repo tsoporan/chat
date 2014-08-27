@@ -1,3 +1,4 @@
+'use strict';
 jQuery(document).ready(function($) {
 
   var socket    = io(),
@@ -112,7 +113,7 @@ jQuery(document).ready(function($) {
   }
 
   function closeAlert(label) {
-    $('.alert-box.'+label).remove();
+    $('.alert-box.' + label + ' .close').click();
   }
 
   function addToNames(nickObj) {
@@ -214,7 +215,7 @@ jQuery(document).ready(function($) {
 
   // Sending message from web.
   $('form.send').submit(function(e) {
-    if (e) e.preventDefault();
+    if (e) { e.preventDefault(); }
 
     var el  = $('input[name=message]');
     var val = el.val();
@@ -273,8 +274,8 @@ jQuery(document).ready(function($) {
     $('#channel-list').empty();
     $('#channel-containers').empty();
 
-    // Hide alerts.
-    $('.alert-box.connecting').remove();
+    // Close connecting show connected.
+    closeAlert('connecting');
     setTimeout(function() {
       createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
     }, 500);
@@ -346,7 +347,7 @@ jQuery(document).ready(function($) {
       type      : 'user',
     };
 
-    cached = nick in nickCache;
+    var cached = nick in nickCache;
     if (!cached) {
       nickCache[nick] = {
         color: getColor(),
@@ -361,6 +362,8 @@ jQuery(document).ready(function($) {
 
   socket.on('ircJoin', function(data) {
     console.log('ircJoin', data);
+
+    closeAlert('connected');
 
     var channel   = data.channel,
         nick      = data.nick,
@@ -384,7 +387,6 @@ jQuery(document).ready(function($) {
     addToNames({ nick: nick, channel: channel });
     postToChannel(msgObj);
 
-    closeAlert('connected');
 
   });
 
