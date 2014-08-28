@@ -158,6 +158,9 @@ span.text {
 .message.system_msg {
   font-style: italic;
 }
+.message.hilited {
+  background: #d5ffc2;
+}
 /* Send form styles */
 input[name=send] {
   padding: 10px;

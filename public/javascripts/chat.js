@@ -5,7 +5,7 @@ jQuery(document).ready(function($) {
       connected = false,
       channels  = {},
       nickCache = {},
-      nick;
+      socketNick;
 
   function setContainerHeight() {
     var viewHeight      = $(window).innerHeight(),
@@ -141,6 +141,7 @@ jQuery(document).ready(function($) {
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
         color      = 'none',
+        hilighted,
         chanMsgs,
         containers,
         html;
@@ -172,7 +173,9 @@ jQuery(document).ready(function($) {
         break;
 
       case 'user':
-        html = '<li class="message '+ type +'" data-to="' + channel +  '">' +
+        hilited = (msg.indexOf(socketNick) !== -1 && nick !== socketNick) ? 'hilited' : '';
+
+        html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
                '<span class="timestamp">' + when + '</span>' +
                '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + msg + '</span></li>';
         appendHTML(containers, html);
@@ -193,15 +196,14 @@ jQuery(document).ready(function($) {
 
   // Connecting to IRC from web.
   $('form.connect').on('valid.fndtn.abide', function() {
-    var server   = $('input[name=server]').val(),
-        channels = $('input[name=channels]').val();
-
-    nick = $('input[name=nickName]').val();
+    var server     = $('input[name=server]').val(),
+        channels   = $('input[name=channels]').val(),
+        socketNick = $('input[name=nickName]').val();
 
     socket.emit('connectToIRC', {
       server  : server,
       channels: channels,
-      nick    : nick
+      nick    : socketNick
     });
 
     $('a.close-reveal-modal').click();
@@ -233,7 +235,7 @@ jQuery(document).ready(function($) {
 
     var msgObj = {
       msg     : msg,
-      nick    : nick,
+      nick    : socketNick,
       when    : moment(),
       channel : channel,
       type    : 'user',
@@ -241,9 +243,9 @@ jQuery(document).ready(function($) {
 
     postToChannel(msgObj);
 
-    var cached = nickCache[nick];
+    var cached = nickCache[socketNick];
     if (!cached) {
-      nickCache[nick] = {
+      nickCache[socketNick] = {
         color: 'black',
       };
     }
@@ -254,8 +256,8 @@ jQuery(document).ready(function($) {
   socket.on('ircConnected', function(data) {
     console.log('info received', data);
 
-    connected = true;
-    nick      = data.nick;
+    connected  = true;
+    socketNick = data.nick;
 
     var when         = data.when,
         server       = data.server,
@@ -280,7 +282,7 @@ jQuery(document).ready(function($) {
     // Hide the connect and show the user menu.
     $('#connect').addClass('hidden');
 
-    var menuHTML = '<a>Hi, ' + nick + '</a>' +
+    var menuHTML = '<a>Hi, ' + socketNick + '</a>' +
                    '<ul class="dropdown">'+
                    '<li><a id="disconnect">Disconnect</a></li>' +
                    '</ul>';
@@ -409,7 +411,7 @@ jQuery(document).ready(function($) {
         nick           = data.nick,
         when           = data.when,
         rawMsg         = data.message,
-        topicContainer =  $('div.channel[data-channel="'+ channel +'"] div.topic span');
+        topicContainer = $('div.channel[data-channel="'+ channel +'"] div.topic span');
 
     console.log('ircTopic', data);
     topicContainer.empty();

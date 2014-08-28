@@ -19,6 +19,7 @@
 @irc_pink : #FF7CCB;
 @irc_grey : #A5A5A5;
 @irc_light_grey : #C9C9C9;
+@hilited : #D5FFC2;
 
 .color_none, .color_black { color: @black; }
 .color_blue { color: @irc_blue; }
@@ -151,6 +152,10 @@ span.text {
 }
 .message.system_msg {
   font-style: italic;
+}
+
+.message.hilited {
+  background: @hilited;
 }
 
 /* Send form styles */
