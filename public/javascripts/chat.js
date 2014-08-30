@@ -1,5 +1,5 @@
-'use strict';
 jQuery(document).ready(function($) {
+  'use strict';
 
   var socket    = io(),
       connected = false,
@@ -141,7 +141,7 @@ jQuery(document).ready(function($) {
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
         color      = 'none',
-        hilighted,
+        hilited,
         chanMsgs,
         containers,
         html;
@@ -222,25 +222,39 @@ jQuery(document).ready(function($) {
     var val = el.val();
 
     // Get the channel from the URL
-    var channel = location.hash || '#root';
-    var msg     = val;
+    var channel   = location.hash || '#root';
+    var msg       = val;
+    var isCommand = msg.indexOf('/') === 0;
 
-    if (msg) {
+    var msgObj = {
+      nick    : socketNick,
+      when    : moment(),
+      channel : channel,
+    };
+
+    if (isCommand) {
+      console.log('sending command ...', msg);
+      socket.emit('webCommand', {
+          channel: channel,
+          command: msg,
+      });
+
+      msgObj.type = 'system';
+      msgObj.msg  = 'Issued command: ' + msg;
+
+    } else if (msg) {
+      console.log('sending message ...', msg);
       socket.emit('webMessage', {
         channel : channel,
         msg     : msg
       });
       el.val('');
+
+      msgObj.type = 'user';
+      msgObj.msg  = msg;
     }
 
-    var msgObj = {
-      msg     : msg,
-      nick    : socketNick,
-      when    : moment(),
-      channel : channel,
-      type    : 'user',
-    };
-
+ 
     postToChannel(msgObj);
 
     var cached = nickCache[socketNick];
