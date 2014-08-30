@@ -12,7 +12,7 @@ function disconnectCleanup (socket) {
 
   var _disconnect = function () {
 
-    var user = clients[socket.id]
+    var user = clients[socket.id];
 
     if (user && user.client) {
       user.client.disconnect(function() {
@@ -195,7 +195,7 @@ io.on('connection', function(socket) {
         socket: socket,
         client: client,
         nick  : nick,
-      }
+      };
 
       // Emit the client info to the web client.
       socket.emit('ircConnected', {
@@ -219,8 +219,40 @@ io.on('connection', function(socket) {
 
       client.say(channel, msg);
 
-      // TODO: process commands
-      //
+    });
+
+    socket.on('webCommand', function(data){
+      console.log('webCommand', data);
+      var channel = data.channel,
+          command = data.command,
+          parts   = command.split(' '),
+          cmdPart = parts[0],
+          cmdArgs = parts.slice(1);
+
+      var cmdMapping = {
+        '/join' :  'JOIN',
+        '/part' :  'PART',
+      };
+
+      switch (cmdPart) {
+        case '/join':
+          if (parts.length > 1) {
+              err = 'Join takes one argument, a channel to join.';
+          }
+          var newChannel = parts[1];
+
+          // Ensure #name channel format
+          if (newChannel.indexOf('#') !== 0 ) {
+            newChannel = '#' + newChannel;
+          }
+          console.log('in /join', newChannel);
+
+          client.send(cmdMapping[cmdPart], newChannel);
+
+          break;
+        default:
+          console.log('default case?');
+      }
 
     });
 
@@ -228,4 +260,4 @@ io.on('connection', function(socket) {
 
 });
 
-module.exports = httpServer
+module.exports = httpServer;
