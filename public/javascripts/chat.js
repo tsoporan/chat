@@ -137,14 +137,16 @@ jQuery(document).ready(function($) {
 
     var channel    = msgObj.channel,
         nick       = msgObj.nick,
-        msg        = escapeHTML(msgObj.msg),
+        msg        = msgObj.msg,
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
         color      = 'none',
+        msgArray   = Array.isArray(msg),
+        html       = '',
         hilited,
         chanMsgs,
         containers,
-        html;
+        m;
 
     if (nickCache[nick]) {
       color = nickCache[nick].color;
@@ -168,20 +170,47 @@ jQuery(document).ready(function($) {
 
     switch (type) {
       case 'system':
-        html = '<li class="message system_msg"><span class="timestamp">' + when + '</span>' + msg + '</li>';
+
+        if (msgArray) {
+          for (var i = 0; i < msg.length; i++) {
+            m = escapeHTML(msg[i]);
+            if (m) {
+              html += '<li class="message system_msg"><span class="timestamp">' + when + '</span>' + m + '</li>';
+            }
+          }
+        } else {
+          m = escapeHTML(msg);
+          html = '<li class="message system_msg"><span class="timestamp">' + when + '</span>' + m + '</li>';
+        }
         appendHTML(containers, html);
+
         break;
 
       case 'user':
+
         hilited = (msg.indexOf(socketNick) !== -1 && nick !== socketNick) ? 'hilited' : '';
 
-        html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
-               '<span class="timestamp">' + when + '</span>' +
-               '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + msg + '</span></li>';
+        if (msgArray) {
+          for (var j = 0; j < msg.length; j++) {
+            m = escapeHTML(msg[j]);
+            if (m) {
+              html += '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
+                     '<span class="timestamp">' + when + '</span>' +
+                     '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
+            }
+          }
+        } else {
+          m = escapeHTML(msg);
+          html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
+                 '<span class="timestamp">' + when + '</span>' +
+                 '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
+        }
         appendHTML(containers, html);
+
         break;
 
       default:
+        // Do nothing.
         break;
     }
 
@@ -248,13 +277,14 @@ jQuery(document).ready(function($) {
         channel : channel,
         msg     : msg
       });
-      el.val('');
 
       msgObj.type = 'user';
       msgObj.msg  = msg;
     }
 
- 
+    // Clear out message area.
+    el.val('');
+
     postToChannel(msgObj);
 
     var cached = nickCache[socketNick];

@@ -153,7 +153,7 @@ io.on('connection', function(socket) {
     client.on('motd', function(motd) {
       socket.emit('ircMOTD', {
         when : moment(),
-        motd : motd,
+        motd : motd.split('\n'),
       });
     });
 

@@ -126,12 +126,12 @@ h2.intro {
   margin: 0 5px;
 }
 #channels li a {
-  background: #3a3a3a;
-  color: #fafafa;
-}
-#channels li a.channelLink.selected {
   background: #e3e3e3;
   color: #3a3a3a;
+}
+#channels li a.channelLink.selected {
+  background: #3a3a3a;
+  color: #fafafa;
 }
 /* Channel styles */
 div.channel {
