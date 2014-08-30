@@ -88,6 +88,9 @@ body {
 .button:focus {
   background: #e3e3e3;
 }
+.button.disabled {
+  background: #e3e3e3;
+}
 .alert-box {
   display: none;
 }
@@ -116,6 +119,30 @@ h2.intro {
   width: 40%;
   left: 0;
   right: 0;
+}
+hr.intro-sep {
+  padding: 0;
+  border: none;
+  border-top: medium double #e3e3e3;
+  color: #e3e3e3;
+  text-align: center;
+  margin: 60px 0;
+}
+hr.intro-sep:after {
+  content: "§";
+  display: inline-block;
+  position: relative;
+  top: -0.2em;
+  font-size: 4em;
+  padding: 0 0.25em;
+  background: #fafafa;
+}
+#channel-containers ul.popular-networks {
+  text-align: center;
+}
+#channel-containers ul.popular-networks li {
+  display: inline;
+  margin: 0 10px;
 }
 /* Channel list styles */
 #channel-list {
@@ -167,7 +194,7 @@ span.text {
 .message.hilited {
   background: #d5ffc2;
 }
-/* Send form styles */
+/* Msg send form styles */
 input[name=send] {
   padding: 10px;
 }
@@ -182,7 +209,6 @@ div.wrap:after {
 /* Names sidebar styles */
 li.nick {
   font-weight: bold;
-  padding-left: 5px;
 }
 li.nick .mode {
   color: #ff7200;
