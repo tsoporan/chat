@@ -126,7 +126,7 @@ jQuery(document).ready(function($) {
         nickHTML       = '',
         nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul');
 
-    nickHTML = '<li class="nick rtext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+    nickHTML = '<li class="nick ltext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
     nameContainer.append(nickHTML);
 
   }
@@ -443,7 +443,7 @@ jQuery(document).ready(function($) {
 
    for (var nick in nicks) {
     var mode = nicks[nick];
-    var nickHTML = '<li class="nick rtext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+    var nickHTML = '<li class="nick ltext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
     nameContainer.append(nickHTML);
    }
 

@@ -135,6 +135,14 @@ div.channel {
 }
 
 /* Message styles */
+div.channel .messages {
+    border-right: 1px solid @lgrey;
+}
+
+div.channel[data-channel='#root'] .messages {
+    border-right: none;
+}
+
 #channel-containers .message {
   border-bottom: 1px solid @lgrey;
   padding: 5px;
@@ -158,10 +166,11 @@ span.text {
   background: @hilited;
 }
 
-/* Send form styles */
+/* Msg send form styles */
 input[name=send] {
   padding: 10px;
 }
+
 /* Footer styles */
 footer {
   border-top: 1px solid @lgrey;
@@ -170,14 +179,16 @@ footer {
 div.wrap:after {
   height: 100px;
 }
+
 /* Names sidebar styles */
+div.names {
+}
 li.nick {
   font-weight: bold;
 }
 li.nick .mode {
   color: @orange;
 }
-
 
 /* Topic styles */
 div.topic {
