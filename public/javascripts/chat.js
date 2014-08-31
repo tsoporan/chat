@@ -209,6 +209,14 @@ jQuery(document).ready(function($) {
 
         break;
 
+      case 'error':
+          m = escapeHTML(msg);
+          html = '<li class="message error"><span class="timestamp">' + when + '</span>' + m + '</li>';
+
+          appendHTML(containers, html);
+
+          break;
+
       default:
         // Do nothing.
         break;
@@ -504,6 +512,38 @@ jQuery(document).ready(function($) {
   socket.on('ircPart', function(data) {
     console.log('ircPart', data);
 
+    var channel = data.channel,
+        when    = data.when;
+
+    // Remove local copy.
+    if (channel in channels) {
+      delete channels[channel];
+      console.log('removed channel from local', channels);
+    }
+
+    // Remove UI els.
+    var channelListEl = $('#channel-list li[data-channel="' + channel + '"]');
+    channelListEl.fadeOut(400, function() {
+
+      channelListEl.remove();
+
+      var channelContEl = $('#channel-containers div[data-channel="' + channel + '"]');
+
+      channelContEl.fadeOut(400, function() {
+
+        channelContEl.remove();
+
+        // Unhide root window.
+        $('#channel-containers div[data-channel="#root"]').removeClass('hidden');
+
+        // Move back to root channel.
+        window.location.hash = '#root';
+
+      });
+
+    });
+
+
   });
 
   socket.on('ircQuit', function(data) {
@@ -544,6 +584,23 @@ jQuery(document).ready(function($) {
         when = data.when;
 
     console.log('*** ircError: ', msg, when);
+  });
+
+  socket.on('commandError', function(data) {
+    var channel = data.channel,
+        msg     = data.msg,
+        when    = data.when;
+
+    var msgObj = {
+      channel: channel,
+      msg    : msg,
+      when   : when,
+      type   : 'error',
+    };
+
+    postToChannel(msgObj);
+
+    console.log('*** commandError', data);
   });
 
   socket.on('error', function() {

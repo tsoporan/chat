@@ -29,6 +29,7 @@ function disconnectCleanup (socket) {
   return _disconnect;
 }
 
+
 // On connection store the socket and newly created client
 io.on('connection', function(socket) {
     console.log('Socket connected: ' + socket.id);
@@ -123,15 +124,16 @@ io.on('connection', function(socket) {
       console.log('CLIENT LEFT CHANNEL:', channel);
 
       // Remove from channels.
-      var channels = clients[socket.id].channels;
+      var channels = clients[socket.id].channels,
+          idx      = channels.indexOf(channel);
 
-      if (channels.indexOf(channel) !== -1) {
-        channels.splice(channels.indexOf(channel), 1);
+      if (idx !== -1) {
+        channels.splice(idx, 1);
       }
 
+      // Let the client know which channel we've left.
       socket.emit('ircPart', {
         channel    : channel,
-        allChanenls: clients[socket.id].channels,
         when       : moment()
       });
 
@@ -229,16 +231,32 @@ io.on('connection', function(socket) {
           cmdPart = parts[0],
           cmdArgs = parts.slice(1);
 
+      console.log('parts', parts);
+      console.log('cmdPart', cmdPart);
+      console.log('cmdArgs', cmdArgs);
+
       var cmdMapping = {
-        '/join' :  'JOIN',
-        '/part' :  'PART',
+        '/join' : 'JOIN',
+        '/part' : 'PART',
+        '/topic': 'TOPIC',
+      };
+
+      var sendError = function(channel, msg) {
+        socket.emit('commandError', {
+          channel: channel,
+          msg    : msg,
+          when   : moment(),
+        });
       };
 
       switch (cmdPart) {
         case '/join':
-          if (parts.length > 1) {
-              err = 'Join takes one argument, a channel to join.';
+          console.log('join command');
+
+          if (cmdArgs.length > 1) {
+            return sendError(channel, 'Join takes only one argument, a channel to join!');
           }
+
           var newChannel = parts[1];
 
           // Ensure #name channel format
@@ -247,9 +265,24 @@ io.on('connection', function(socket) {
           }
           console.log('in /join', newChannel);
 
+          // Send IRC command for JOIN.
           client.send(cmdMapping[cmdPart], newChannel);
 
           break;
+
+        case '/part':
+          console.log('part command');
+
+          // Send IRC command to PART channel.
+          client.send(cmdMapping[cmdPart], channel);
+
+          break;
+
+        case '/topic':
+          console.log('topic command');
+
+          break;
+
         default:
           console.log('default case?');
       }

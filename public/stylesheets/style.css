@@ -194,6 +194,13 @@ span.text {
 .message.hilited {
   background: #d5ffc2;
 }
+.message.error {
+  color: #f83a3a;
+  font-style: italic;
+}
+.message.error .timestamp {
+  color: #3a3a3a;
+}
 /* Msg send form styles */
 input[name=send] {
   padding: 10px;
