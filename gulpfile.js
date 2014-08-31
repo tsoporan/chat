@@ -52,4 +52,4 @@ gulp.task('js', function() {
 });
 
 
-gulp.task('default', ['clean', 'less', 'css', 'js']);
+gulp.task('default', ['clean', 'less', 'css', 'lint', 'js']);
