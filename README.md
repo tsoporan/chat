@@ -1,4 +1,28 @@
  #chat
------
+======
 
-A web interace to IRC, to get up and running clone and ```npm install``` and ```npm start```
+A web interface for IRC! Using node.js, express, websockets, and foundation.
+
+
+Getting started:
+----------------
+
+Clone the repository:
+```
+https://github.com/tsoporan/chat.git chat
+```
+
+Install deps:
+```
+cd chat; npm install
+```
+
+Start it up:
+```
+npm start
+```
+
+See in action:
+``` 
+http://localhost:3000/
+```
