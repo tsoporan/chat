@@ -7,6 +7,12 @@ A web interface for IRC! Using node.js, express, websockets, and foundation.
 Getting started:
 ----------------
 
+Requirements:
+
+```
+node (npm comes with node)
+```
+
 Clone the repository:
 ```
 git clone https://github.com/tsoporan/chat.git chat
