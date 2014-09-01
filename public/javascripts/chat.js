@@ -152,8 +152,21 @@ jQuery(document).ready(function($) {
       color = nickCache[nick].color;
     }
 
-    // If no channel is provided send to all channels.
+    if (!connected) {
+      // Send error to all channels.
+      msg  = 'You are no longer connected! Please connect to send messages!';
+      type = 'error';
+    }
+
+    // Use this channel to send.
     if (channel) {
+
+      var exists = channel in channels;
+
+      if (!exists) {
+        channels[channel] = {};
+      }
+
       // Keep a copy of message.
       chanMsgs = channels[channel].messages;
       if (chanMsgs) {
@@ -164,7 +177,7 @@ jQuery(document).ready(function($) {
 
       containers = $('#channel-containers div[data-channel="' + channel + '"] div.messages ul');
 
-    } else {
+    } else { // If no channel is provided send to all channels.
       containers = $('#channel-containers div.messages ul');
     }
 
@@ -323,8 +336,7 @@ jQuery(document).ready(function($) {
       when    : when,
     };
 
-    // Empty out initial content.
-    $('#channel-list').empty();
+    // Hide intro content, to use later.
     $('#channel-containers div.intro').addClass('hidden');
 
     // Close connecting show connected.
@@ -349,16 +361,23 @@ jQuery(document).ready(function($) {
 
     // Add the root channel.
     var channel     = '#root',
+        channelCont = $('#channel-containers'),
         channelHTML = '<div class="channel" data-channel="' + channel + '"><div class="messages"><ul class="no-bullet"></ul></div></div>',
         channelList = $('#channel-list'),
         linkHTML    = '<li data-channel="'+ channel +'" class="channel">' +
                       '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
                       '</li>';
 
-    channelList.append(linkHTML);
+    // Check for existing loaded UI, and continue from there.
+    var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]').length;
+    if (!existingChannelLink) {
+      channelList.append(linkHTML);
+    }
 
-    $('#channel-containers').append(channelHTML);
-    channels['#root'] = {};
+    var existingChannel =  channelCont.find('div[data-channel="' + channel + '"]').length;
+    if (!existingChannel) {
+      channelCont.append(channelHTML);
+    }
 
     postToChannel(msgObj);
 
@@ -429,10 +448,6 @@ jQuery(document).ready(function($) {
       when    : when,
     };
 
-    var exists = channel in channels;
-    if (!exists) {
-      channels[channel] = {};
-    }
     console.log('ircJoin channels', channels);
 
     addToNames({ nick: nick, channel: channel });
@@ -490,7 +505,7 @@ jQuery(document).ready(function($) {
         linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
                            '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
                            '</li>',
-        channelContainer = $('#channel-containers'),
+        channelCont      = $('#channel-containers'),
         channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">'+
                              '<div class="topic">Topic: <span></span></div>' +
                              '<div class="small-9 columns messages">' +
@@ -501,12 +516,21 @@ jQuery(document).ready(function($) {
                              '</div>' +
                            '</div>';
 
-    channels[channel] = {};
+    // Check for existing loaded UI, and continue from there.
+    var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
+    if (!existingChannelLink.length) {
+      channelList.append(linkHTML);
+    }
 
-    channelList.append(linkHTML);
-    channelContainer.append(channelHTML);
-
-    window.location.hash = channel;
+    var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
+    if (!existingChannel) {
+      channelCont.append(channelHTML);
+    }
+    if (window.location.hash === channel) {
+      existingChannelLink.removeClass('selected').addClass('selected');
+    } else {
+      window.location.hash = channel;
+    }
   });
 
   socket.on('ircPart', function(data) {
@@ -569,6 +593,9 @@ jQuery(document).ready(function($) {
     // Remove user menu and show connect.
     $('li.has-dropdown').empty();
     $('#connect').removeClass('hidden');
+
+    // Empty names sidebar.
+    $('div.names ul').empty();
 
   });
 
