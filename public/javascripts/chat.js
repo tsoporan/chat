@@ -165,7 +165,7 @@ jQuery(document).ready(function($) {
       containers = $('#channel-containers div[data-channel="' + channel + '"] div.messages ul');
 
     } else {
-      containers = $('#channel-containers div ul');
+      containers = $('#channel-containers div.messages ul');
     }
 
     switch (type) {
