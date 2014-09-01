@@ -82,32 +82,6 @@ io.on('connection', function(socket) {
 
     });
 
-    client.on('join', function(channel, nick, message) {
-      console.log('CLIENT JOINED CHANNEL:', channel);
-
-      // Keep track of channels joined for web clients.
-      var client = clients[socket.id];
-
-      if (nick === client.nick) {
-        // We want to create a channel client side if a socket user is joining.
-        socket.emit('createChannel', {
-          channel : channel,
-        });
-        if (client.channels) {
-            client.channels.push(channel);
-        } else {
-          client.channels = [channel];
-        }
-      } else {
-        socket.emit('ircJoin', {
-          channel    : channel,
-          //allChannels: clients[socket.id].channels,
-          nick       : nick,
-          when       : moment()
-        });
-      }
-    });
-
     client.on('quit', function(nick, reason, channels, message) {
       console.log("CLIENT QUIT:", nick, channels);
 
@@ -120,21 +94,51 @@ io.on('connection', function(socket) {
 
     });
 
+    client.on('join', function(channel, nick, message) {
+      console.log('CLIENT JOINED CHANNEL:', channel);
+
+      var user   = clients[socket.id],
+          toSend = {
+            channel : channel,
+            when    : moment(),
+            nick    : nick
+           };
+      
+
+      // Keep track of channels joined for web clients.
+      if (user.nick === nick) {
+        // We want to create a channel client side if a socket user is joining.
+        if (user.channels) {
+            user.channels.push(channel);
+        } else {
+          user.channels = [channel];
+        }
+
+        toSend.us = true;
+
+      }
+
+      socket.emit('ircJoin', toSend);
+
+    });
+
+
     client.on('part', function(channel, nick, reason, message) {
       console.log('CLIENT LEFT CHANNEL:', channel, nick, reason, message);
 
-      var toSend = {
-        channel : channel,
-        when    : moment(),
-        nick    : nick,
-        reason  : reason || 'No reason.',
-      };
+      var user   = clients[socket.id],
+          toSend = {
+            channel : channel,
+            when    : moment(),
+            nick    : nick,
+            reason  : reason || 'No reason.',
+          };
 
       // Determine if "we've" left.
-      if (clients[socket.id].nick === nick) {
+      if (user.nick === nick) {
 
         // Remove from channels.
-        var channels = clients[socket.id].channels,
+        var channels = user.channels,
             idx      = channels.indexOf(channel);
 
         if (idx !== -1) {

@@ -445,46 +445,20 @@ jQuery(document).ready(function($) {
     console.log('channel messages', channels[channel].messages);
 
   });
-
-  socket.on('ircJoin', function(data) {
-    console.log('ircJoin', data);
-
-    closeAlert('connected');
-
-    var channel   = data.channel,
-        nick      = data.nick,
-        msg       = nick  + ' has joined channel: ' + channel,
-        when      = data.when;
-
-    var msgObj = {
-      channel : channel,
-      nick    : nick,
-      msg     : msg,
-      type    : 'system',
-      when    : when,
-    };
-
-    console.log('ircJoin channels', channels);
-
-    addToNames({ nick: nick, channel: channel });
-    postToChannel(msgObj);
-
-
-  });
-
+  
   socket.on('ircNames', function(data) {
     var channel       = data.channel,
         nicks         = data.nicks,
         when          = data.when,
         nameContainer = $('div.channel[data-channel="' + channel + '"] div.names ul');
 
-   console.log('ircNames', data);
+    console.log('ircNames', data);
 
-   for (var nick in nicks) {
-    var mode = nicks[nick];
-    var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> ' + nick + '</li>';
-    nameContainer.append(nickHTML);
-   }
+    for (var nick in nicks) {
+      var mode = nicks[nick];
+      var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+      nameContainer.append(nickHTML);
+    }
 
   });
 
@@ -512,17 +486,28 @@ jQuery(document).ready(function($) {
     }
   });
 
-  socket.on('createChannel', function(data) {
-    console.log('createChannel', data);
+
+  socket.on('ircJoin', function(data) {
+    console.log('ircJoin', data);
+
     closeAlert('connected');
 
-    var channel          = data.channel,
-        channelList      = $('#channel-list'),
-        linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
-                           '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
-                           '</li>',
-        channelCont      = $('#channel-containers'),
-        channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">'+
+    var channel   = data.channel,
+        nick      = data.nick,
+        msg       = nick  + ' has joined channel: ' + channel,
+        when      = data.when,
+        us        = data.us;
+
+    if (us) {
+
+      // If we're joining check/create UI.
+
+      var channelList      = $('#channel-list'),
+          linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
+                             '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
+                             '</li>',
+          channelCont      = $('#channel-containers'),
+          channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">'+
                              '<div class="topic">Topic: <span></span></div>' +
                              '<div class="small-9 columns messages">' +
                              '<ul class="no-bullet"></ul>' +
@@ -530,23 +515,41 @@ jQuery(document).ready(function($) {
                              '<div class="small-3 columns names">' +
                              '<ul class="no-bullet"></ul>' +
                              '</div>' +
-                           '</div>';
+                             '</div>';
 
-    // Check for existing loaded UI, and continue from there.
-    var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
-    if (!existingChannelLink.length) {
-      channelList.append(linkHTML);
-    }
+      // Check for existing loaded UI, and continue from there.
+      var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
+      if (!existingChannelLink.length) {
+        channelList.append(linkHTML);
+      }
 
-    var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
-    if (!existingChannel) {
-      channelCont.append(channelHTML);
-    }
-    if (window.location.hash === channel) {
-      existingChannelLink.removeClass('selected').addClass('selected');
+      var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
+      if (!existingChannel) {
+        channelCont.append(channelHTML);
+      }
+      if (window.location.hash === channel) {
+        existingChannelLink.removeClass('selected').addClass('selected');
+      } else {
+        window.location.hash = channel;
+      }
+  
     } else {
-      window.location.hash = channel;
-    }
+
+      // Someone else has joined.
+
+      var msgObj = {
+        channel : channel,
+        nick    : nick,
+        msg     : msg,
+        type    : 'system',
+        when    : when,
+      };
+
+      addToNames({ nick: nick, channel: channel });
+      postToChannel(msgObj);
+
+   }
+
   });
 
   socket.on('ircPart', function(data) {
