@@ -325,7 +325,7 @@ jQuery(document).ready(function($) {
 
     // Empty out initial content.
     $('#channel-list').empty();
-    $('#channel-containers').empty();
+    $('#channel-containers div.intro').addClass('hidden');
 
     // Close connecting show connected.
     closeAlert('connecting');
