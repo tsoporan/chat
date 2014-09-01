@@ -121,21 +121,32 @@ io.on('connection', function(socket) {
     });
 
     client.on('part', function(channel, nick, reason, message) {
-      console.log('CLIENT LEFT CHANNEL:', channel);
+      console.log('CLIENT LEFT CHANNEL:', channel, nick, reason, message);
 
-      // Remove from channels.
-      var channels = clients[socket.id].channels,
-          idx      = channels.indexOf(channel);
+      var toSend = {
+        channel : channel,
+        when    : moment(),
+        nick    : nick,
+        reason  : reason || 'No reason.',
+      };
 
-      if (idx !== -1) {
-        channels.splice(idx, 1);
-      }
+      // Determine if "we've" left.
+      if (clients[socket.id].nick === nick) {
+
+        // Remove from channels.
+        var channels = clients[socket.id].channels,
+            idx      = channels.indexOf(channel);
+
+        if (idx !== -1) {
+            channels.splice(idx, 1);
+        }
+
+        toSend.us = true;
+
+      } 
 
       // Let the client know which channel we've left.
-      socket.emit('ircPart', {
-        channel    : channel,
-        when       : moment()
-      });
+      socket.emit('ircPart', toSend);
 
     });
 
@@ -267,6 +278,8 @@ io.on('connection', function(socket) {
 
           // Send IRC command for JOIN.
           client.send(cmdMapping[cmdPart], newChannel);
+
+          console.log('after client send');
 
           break;
 

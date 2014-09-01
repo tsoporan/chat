@@ -126,8 +126,24 @@ jQuery(document).ready(function($) {
         nickHTML       = '',
         nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul');
 
-    nickHTML = '<li class="nick ltext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+    nickHTML = '<li class="nick ltext" data-nick="'+ nick +'"><span class="mode">' + mode + '</span> ' + nick + '</li>';
     nameContainer.append(nickHTML);
+
+  }
+
+  function removeFromNames(nickObj) {
+    console.log('remove from names', nickObj);
+
+    var channel        = nickObj.channel,
+        nick           = nickObj.nick,
+        nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul'),
+        exists;
+
+    exists = nameContainer.find('.nick[data-nick="'+ nick +'"]');
+
+    if (exists.length) {
+      exists.remove();
+    }
 
   }
 
@@ -466,7 +482,7 @@ jQuery(document).ready(function($) {
 
    for (var nick in nicks) {
     var mode = nicks[nick];
-    var nickHTML = '<li class="nick ltext"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+    var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> ' + nick + '</li>';
     nameContainer.append(nickHTML);
    }
 
@@ -537,35 +553,53 @@ jQuery(document).ready(function($) {
     console.log('ircPart', data);
 
     var channel = data.channel,
-        when    = data.when;
+        when    = data.when,
+        us      = data.us,
+        nick    = data.nick,
+        reason  = data.reason;
 
-    // Remove local copy.
-    if (channel in channels) {
-      delete channels[channel];
-      console.log('removed channel from local', channels);
-    }
+    if (us) {
+      // Remove local copy.
+      if (channel in channels) {
+        delete channels[channel];
+        console.log('removed channel from local', channels);
+      }
 
-    // Remove UI els.
-    var channelListEl = $('#channel-list li[data-channel="' + channel + '"]');
-    channelListEl.fadeOut(400, function() {
+      // Remove UI els.
+      var channelListEl = $('#channel-list li[data-channel="' + channel + '"]');
+      channelListEl.fadeOut(400, function() {
 
-      channelListEl.remove();
+        channelListEl.remove();
 
-      var channelContEl = $('#channel-containers div[data-channel="' + channel + '"]');
+        var channelContEl = $('#channel-containers div[data-channel="' + channel + '"]');
 
-      channelContEl.fadeOut(400, function() {
+        channelContEl.fadeOut(400, function() {
 
-        channelContEl.remove();
+          channelContEl.remove();
 
-        // Unhide root window.
-        $('#channel-containers div[data-channel="#root"]').removeClass('hidden');
+          // Unhide root window.
+          $('#channel-containers div[data-channel="#root"]').removeClass('hidden');
 
-        // Move back to root channel.
-        window.location.hash = '#root';
+          // Move back to root channel.
+          window.location.hash = '#root';
+
+        });
 
       });
+    } else {
+      // Someone else left the room. Clear their name from the names.
 
-    });
+      var msgObj = {
+        channel : channel,
+        msg     : nick + ' has left the room! Reason: ' + reason,
+        type    : 'system', 
+        when    : when,
+      };
+
+      removeFromNames({ channel: channel, nick: nick });
+
+      postToChannel(msgObj);
+    }
 
 
   });
