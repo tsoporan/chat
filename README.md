@@ -9,7 +9,7 @@ Getting started:
 
 Clone the repository:
 ```
-https://github.com/tsoporan/chat.git chat
+git clone https://github.com/tsoporan/chat.git chat
 ```
 
 Install deps:
