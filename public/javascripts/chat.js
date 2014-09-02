@@ -353,7 +353,7 @@ jQuery(document).ready(function($) {
     };
 
     // Hide intro content, to use later.
-    $('#channel-containers div.intro').addClass('hidden');
+    $('#channel-containers div.intro').fadeOut(200);
 
     // Close connecting show connected.
     closeAlert('connecting');
@@ -369,7 +369,9 @@ jQuery(document).ready(function($) {
     $('.top-bar-section li.has-dropdown').append(menuHTML);
 
     $('#disconnect').on('click', function() {
-      socket.emit('disconnectIRC');
+      socket.emit('webCommand', {
+        command : '/quit',
+      });
       return false;
     });
 
@@ -610,27 +612,58 @@ jQuery(document).ready(function($) {
   socket.on('ircQuit', function(data) {
     console.log('ircQuit', data);
 
-    var nick     = data.nick,
-        channels = data.channels, // Channels left
-        reason   = data.reason,
-        when     = data.when,
-        us       = data.us;
+    var nick         = data.nick,
+        leftChannels = data.channels, // Channels left
+        reason       = data.reason,
+        when         = data.when,
+        us           = data.us;
 
     if (us) {
-      // TODO: cleanup the app
+      // Clear out UI and set back to intro.
+      var channelListItems = $('#channel-list li');
+      var channelItems     = $('#channel-containers .channel');
+      channelListItems.fadeOut(function() {
+        // Remove channel list.
+        channelListItems.remove();
+
+        // Remove channels
+        channelItems.fadeOut(function() {
+
+          channelItems.remove();
+
+          // Reset other UI els.
+          $('form.send').fadeOut();
+
+          // Reset other UI els.
+          $('div.intro').fadeIn();
+
+          $('li.has-dropdown').empty();
+          $('a#connect').removeClass('hidden');
+
+        });
+
+      });
+
+      // Reset globs.
+      channels   = {};
+      nickCache  = {};
+      connected  = false;
+      socketNick = null;
+
+      window.location.hash = '#';
 
     } else {
       // Someone else quit.
 
       var msgObj = {
         msg     : nick + ' has quit! Reason: ' + reason,
-        type    : 'system', 
+        type    : 'system',
         when    : when,
       };
 
       // Clean up presence from channels left.
-      for (var i = 0; i < channels.length; i++) {
-        var chan = channels[i];
+      for (var i = 0; i < leftChannels.length; i++) {
+        var chan = leftChannels[i];
         msgObj.channel = chan;
         removeFromNames({ channel: chan, nick: nick });
         postToChannel(msgObj);
@@ -669,6 +702,8 @@ jQuery(document).ready(function($) {
     var msg  = data.msg,
         type = data.type,
         when = data.when;
+
+    // TODO: display these to user
     console.log('*** sysMessage: ', msg, type, when);
   });
 
@@ -676,7 +711,6 @@ jQuery(document).ready(function($) {
     var msg  = data.msg,
         when = data.when;
 
-    console.log('*** ircError: ', msg, when);
 
     var msgObj =  {
       msg  : msg,
@@ -705,10 +739,31 @@ jQuery(document).ready(function($) {
     console.log('*** commandError', data);
   });
 
-  socket.on('error', function() {
-    console.log('error', arguments);
+  // Handle socket connect/reconnect/disconnects.
+  socket.on('connect', function() {
+    console.log(' ** socket connected', arguments);
   });
-
+  socket.on('error', function() {
+    console.log(' ** socket error', arguments);
+  });
+  socket.on('disconnect', function() {
+    console.log(' ** socket disconnect', arguments);
+  });
+  socket.on('reconnect', function() {
+    console.log(' ** socket reconnect', arguments);
+  });
+  socket.on('reconnect_attempt', function() {
+    console.log(' ** socket reconnect attempt', arguments);
+  });
+  socket.on('reconnecting', function() {
+    console.log(' ** socket reconnecting', arguments);
+  });
+  socket.on('reconnect_error', function() {
+    console.log(' ** socket reconnect error', arguments);
+  });
+  socket.on('reconnect_failed', function() {
+    console.log(' ** socket reconnect failed', arguments);
+  });
 
   $(document).foundation();
 });

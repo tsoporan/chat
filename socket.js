@@ -8,34 +8,13 @@ var http       = require('http'),
     clients    = {};
 
 
-function disconnectCleanup (socket) {
-
-  var _disconnect = function () {
-
-    var user = clients[socket.id];
-
-    if (user && user.client) {
-      user.client.disconnect(function() {
-        socket.emit('ircDisconnected', {
-          when : moment()
-        });
-      });
-
-      delete clients[socket.id];
-      console.log('User disconnected: ' +  socket.id);
-    }
-  };
-
-  return _disconnect;
-}
-
-
 // On connection store the socket and newly created client
 io.on('connection', function(socket) {
     console.log('Socket connected: ' + socket.id);
 
-    socket.on('disconnect', disconnectCleanup(socket));
-    socket.on('disconnectIRC', disconnectCleanup(socket));
+    socket.on('disconnect', function() {
+      console.log('*** socket disconnect', arguments);
+    });
 
     socket.on('connectToIRC', function(data) {
       var server   = data.server.split(':')[0],
@@ -208,6 +187,10 @@ io.on('connection', function(socket) {
       });
     });
 
+    client.on('raw', function(message) {
+      console.log('*** RAW MESSAGE: ', message);
+    });
+
     client.connect(function(welcome) {
       console.log('IRC CLIENT CONNECTED FOR: ', socket.id);
       var server,
@@ -265,6 +248,7 @@ io.on('connection', function(socket) {
         '/join' : 'JOIN',
         '/part' : 'PART',
         '/topic': 'TOPIC',
+        '/quit' : 'QUIT',
       };
 
       var sendError = function(channel, msg) {
@@ -305,6 +289,23 @@ io.on('connection', function(socket) {
           console.log('part command');
 
           client.send(cmdMapping[cmdPart], channel);
+
+          break;
+
+        case '/quit':
+          console.log('quit command');
+
+          var reason = cmdArgs.join(' ');
+
+          client.disconnect(reason, function() {
+
+            // Clean up.
+            delete clients[socket.id];
+
+            socket.emit('ircQuit', {
+              us : true,
+            });
+          });
 
           break;
 
