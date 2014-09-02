@@ -609,6 +609,34 @@ jQuery(document).ready(function($) {
 
   socket.on('ircQuit', function(data) {
     console.log('ircQuit', data);
+
+    var nick     = data.nick,
+        channels = data.channels, // Channels left
+        reason   = data.reason,
+        when     = data.when,
+        us       = data.us;
+
+    if (us) {
+      // TODO: cleanup the app
+
+    } else {
+      // Someone else quit.
+    
+      var msgObj = {
+        msg     : nick + ' has quit! Reason: ' + reason,
+        type    : 'system', 
+        when    : when,
+      };
+
+      // Clean up presence from channels left.
+      for (var c in channels) {
+        msgObj.channel = c;
+        removeFromNames({ channel: c, nick: nick });
+        postToChannel(msgObj);
+      }
+
+    }
+
   });
 
   socket.on('ircDisconnected', function(data) {
@@ -648,6 +676,15 @@ jQuery(document).ready(function($) {
         when = data.when;
 
     console.log('*** ircError: ', msg, when);
+    
+    var msgObj =  {
+      msg  : msg,
+      when : when,
+      type : 'error',
+    };
+
+    postToChannel(msgObj);
+
   });
 
   socket.on('commandError', function(data) {

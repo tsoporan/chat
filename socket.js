@@ -85,12 +85,23 @@ io.on('connection', function(socket) {
     client.on('quit', function(nick, reason, channels, message) {
       console.log("CLIENT QUIT:", nick, channels);
 
-      socket.emit('ircQuit', {
-        nick    : nick,
-        reason  : reason,
-        channels: channels,
-        when    : moment()
-      });
+      var user   = clients[socket.id],
+          toSend =  {
+            nick     : nick,
+            channels : channels,
+            reason   : reason,
+            when     : moment(),
+          };
+         
+      // After quit, cleanup.
+      if (user.nick === nick) {
+
+        delete clients[socket.id];
+
+        toSend.us = true;
+      }
+
+      socket.emit('ircQuit', toSend);
 
     });
 
@@ -268,35 +279,42 @@ io.on('connection', function(socket) {
         case '/join':
           console.log('join command');
 
-          if (cmdArgs.length > 1) {
-            return sendError(channel, 'Join takes only one argument, a channel to join!');
+          var newChannels = '';
+          var user = clients[socket.id];
+          var exists;
+          
+
+          for (var i = 0; i < cmdArgs.length; i++) {
+            var channelName = cmdArgs[i];
+
+            if (channelName.indexOf('#') !== 0) {
+              channelName = '#' + channelName;
+            }
+
+            // Only join new channels.
+            exists = channelName in user.channels;
+            if (!exists) {
+              newChannels += channelName +',';
+            }
           }
 
-          var newChannel = parts[1];
-
-          // Ensure #name channel format
-          if (newChannel.indexOf('#') !== 0 ) {
-            newChannel = '#' + newChannel;
-          }
-          console.log('in /join', newChannel);
-
-          // Send IRC command for JOIN.
-          client.send(cmdMapping[cmdPart], newChannel);
-
-          console.log('after client send');
+          client.send(cmdMapping[cmdPart], newChannels);
 
           break;
 
         case '/part':
           console.log('part command');
 
-          // Send IRC command to PART channel.
           client.send(cmdMapping[cmdPart], channel);
 
           break;
 
         case '/topic':
           console.log('topic command');
+
+          var newTopic = cmdArgs.join(' ');
+
+          client.send(cmdMapping[cmdPart], channel, newTopic );
 
           break;
 
