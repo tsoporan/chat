@@ -92,7 +92,7 @@ io.on('connection', function(socket) {
             reason   : reason,
             when     : moment(),
           };
-         
+
       // After quit, cleanup.
       if (user.nick === nick) {
 
@@ -114,7 +114,7 @@ io.on('connection', function(socket) {
             when    : moment(),
             nick    : nick
            };
-      
+
 
       // Keep track of channels joined for web clients.
       if (user.nick === nick) {
@@ -282,7 +282,6 @@ io.on('connection', function(socket) {
           var newChannels = '';
           var user = clients[socket.id];
           var exists;
-          
 
           for (var i = 0; i < cmdArgs.length; i++) {
             var channelName = cmdArgs[i];

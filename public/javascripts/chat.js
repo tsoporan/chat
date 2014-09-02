@@ -621,7 +621,7 @@ jQuery(document).ready(function($) {
 
     } else {
       // Someone else quit.
-    
+
       var msgObj = {
         msg     : nick + ' has quit! Reason: ' + reason,
         type    : 'system', 
@@ -629,9 +629,10 @@ jQuery(document).ready(function($) {
       };
 
       // Clean up presence from channels left.
-      for (var c in channels) {
-        msgObj.channel = c;
-        removeFromNames({ channel: c, nick: nick });
+      for (var i = 0; i < channels.length; i++) {
+        var chan = channels[i];
+        msgObj.channel = chan;
+        removeFromNames({ channel: chan, nick: nick });
         postToChannel(msgObj);
       }
 
@@ -676,7 +677,7 @@ jQuery(document).ready(function($) {
         when = data.when;
 
     console.log('*** ircError: ', msg, when);
-    
+
     var msgObj =  {
       msg  : msg,
       when : when,
