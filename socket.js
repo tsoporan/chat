@@ -1,3 +1,5 @@
+// #chat server side logics.
+
 var http       = require('http'),
     app        = require('./app'),
     socketio   = require('socket.io'),
@@ -19,7 +21,7 @@ io.on('connection', function(socket) {
       var user = clients[socket.id];
       if (user && user.client) {
         user.client.disconnect(function() {
-          console.log('client disconnected for: ', user);
+          console.log('client disconnected for: ', user.nick);
         });
       }
 
@@ -35,6 +37,7 @@ io.on('connection', function(socket) {
 
       // Check for duplicate connections for client.
       exists = clients[socket.id];
+
       if (exists) {
         socket.emit('systemMessage', {
           type : 'error',
@@ -43,8 +46,6 @@ io.on('connection', function(socket) {
         });
         return false;
       }
-
-      console.log("in connect to irc", data);
 
       channels = channels.split(',');
 
@@ -62,9 +63,7 @@ io.on('connection', function(socket) {
       });
 
     client.on('error', function(err) {
-      // Error handling.
-      console.log('IRC CLIENT ERROR: ', err);
-
+      // IRC error handling.
       socket.emit('ircError', {
         msg  : err.args[1],
         when : moment(),
@@ -73,7 +72,6 @@ io.on('connection', function(socket) {
     });
 
     client.on('quit', function(nick, reason, channels, message) {
-      console.log("CLIENT QUIT:", nick, channels);
 
       var user   = clients[socket.id],
           toSend =  {
@@ -96,7 +94,6 @@ io.on('connection', function(socket) {
     });
 
     client.on('join', function(channel, nick, message) {
-      console.log('CLIENT JOINED CHANNEL:', channel);
 
       var user   = clients[socket.id],
           toSend = {
@@ -125,7 +122,6 @@ io.on('connection', function(socket) {
 
 
     client.on('part', function(channel, nick, reason, message) {
-      console.log('CLIENT LEFT CHANNEL:', channel, nick, reason, message);
 
       var user   = clients[socket.id],
           toSend = {
@@ -148,7 +144,7 @@ io.on('connection', function(socket) {
 
         toSend.us = true;
 
-      } 
+      }
 
       // Let the client know which channel we've left.
       socket.emit('ircPart', toSend);
@@ -156,8 +152,8 @@ io.on('connection', function(socket) {
     });
 
     client.on('message', function(nick, to, text, message) {
-      console.log('on message', nick, to, text, message);
 
+      // Messages sent in IRC are relayed to the client.
       socket.emit('ircMessage', {
         nick   : nick,
         to     : to,
@@ -169,6 +165,8 @@ io.on('connection', function(socket) {
     });
 
     client.on('motd', function(motd) {
+
+      // Send the message of the day.
       socket.emit('ircMOTD', {
         when : moment(),
         motd : motd.split('\n'),
@@ -176,8 +174,8 @@ io.on('connection', function(socket) {
     });
 
     client.on('names', function(channel, nicks) {
-      console.log('names', channel, nicks);
 
+      // Send a list of nicks in channel.
       socket.emit('ircNames', {
         channel : channel,
         nicks   : nicks,
@@ -187,8 +185,8 @@ io.on('connection', function(socket) {
     });
 
     client.on('topic', function(channel, topic, nick, message) {
-      console.log('topic', channel, topic, nick, message);
 
+      // Send the current IRC topic.
       socket.emit('ircTopic', {
         channel : channel,
         topic   : topic,
@@ -199,11 +197,11 @@ io.on('connection', function(socket) {
     });
 
     client.on('raw', function(message) {
-      console.log('*** RAW MESSAGE: ', message);
+      //console.log('*** RAW MESSAGE: ', message);
     });
 
     client.connect(function(welcome) {
-      console.log('IRC CLIENT CONNECTED FOR: ', socket.id);
+
       var server,
           serverMsg,
           nick;
@@ -228,8 +226,6 @@ io.on('connection', function(socket) {
         when         : moment()
       });
 
-      console.log('clients', clients);
-
     });
 
     // Handle web chat logic.
@@ -237,23 +233,18 @@ io.on('connection', function(socket) {
       var channel   = data.channel,
           msg       = data.msg;
 
-      console.log("Got message from web: " + msg);
-
+      // Say in IRC.
       client.say(channel, msg);
 
     });
 
     socket.on('webCommand', function(data){
-      console.log('webCommand', data);
+
       var channel = data.channel,
           command = data.command,
           parts   = command.split(' '),
           cmdPart = parts[0],
           cmdArgs = parts.slice(1);
-
-      console.log('parts', parts);
-      console.log('cmdPart', cmdPart);
-      console.log('cmdArgs', cmdArgs);
 
       var cmdMapping = {
         '/join' : 'JOIN',
@@ -272,7 +263,6 @@ io.on('connection', function(socket) {
 
       switch (cmdPart) {
         case '/join':
-          console.log('join command');
 
           var newChannels = '';
           var user = clients[socket.id];
@@ -297,14 +287,12 @@ io.on('connection', function(socket) {
           break;
 
         case '/part':
-          console.log('part command');
 
           client.send(cmdMapping[cmdPart], channel);
 
           break;
 
         case '/quit':
-          console.log('quit command');
 
           var reason = cmdArgs.join(' ');
 
@@ -321,7 +309,6 @@ io.on('connection', function(socket) {
           break;
 
         case '/topic':
-          console.log('topic command');
 
           var newTopic = cmdArgs.join(' ');
 
