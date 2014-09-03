@@ -7,6 +7,11 @@ jQuery(document).ready(function($) {
       nickCache = {},
       socketNick;
 
+  // Startswith functionality for String.
+  String.prototype.startsWith = function(str) {
+    return this.indexOf(str) === 0;
+  };
+
   function setContainerHeight() {
     var viewHeight      = $(window).innerHeight(),
         wrapperOffset   = $('div.wrap').offset().top,
@@ -145,6 +150,40 @@ jQuery(document).ready(function($) {
       exists.remove();
     }
 
+  }
+
+  function nameComplete(word, channel) {
+    // Complete based on the names we have in this channel.
+
+    var namesEls = $('#channel-containers div.channel[data-channel="' + channel + '"] div.names ul li'),
+        names    = [];
+
+    word = word[0].toLowerCase();
+
+    if (namesEls.length) {
+      namesEls.each(function(i, el) {
+        var nameText = $(el).attr('data-nick').toLowerCase();
+
+        console.log('nameText', nameText);
+
+        names.push(nameText);
+      });
+    }
+
+    if (names.length) {
+      for (var i = 0; i < names.length; i++) {
+        var name = names[i];
+
+        // Check if the word matches the  beginning of the nick, as soon
+        // as a match is found return it.
+        if (name.startsWith(word)) {
+          return name;
+        }
+      }
+
+    }
+
+    return false;
   }
 
   function postToChannel(msgObj) {
@@ -332,6 +371,31 @@ jQuery(document).ready(function($) {
     }
 
     return false;
+  });
+
+  // Hijack tab behaviour.
+  $('form.send').on('keydown', function(e) {
+    var keyCode = e.keyCode || e.which,
+        inputEl = $('form.send input[name=message]'),
+        val     = inputEl.val();
+
+    if (keyCode == 9) {
+      e.preventDefault();
+
+      // A value exists and the last character is not a space, try to autocomplete.
+      if (val && val[val.length-1] !== " ") {
+
+        var channel = window.location.hash,
+            word    = val.split(' ').slice(-1), // We only want the last word to autocomplete.
+            match   = nameComplete(word, channel);
+
+        if (match) {
+          // Plug in the value.
+          var newVal = val.split(' ').slice(0, -1).join(' ') + match + ' ';
+          inputEl.val(newVal);
+        }
+      }
+    }
   });
 
   socket.on('ircConnected', function(data) {
