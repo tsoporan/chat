@@ -14,6 +14,17 @@ io.on('connection', function(socket) {
 
     socket.on('disconnect', function() {
       console.log('*** socket disconnect', arguments);
+
+      // Clean up.
+      var user = clients[socket.id];
+      if (user && user.client) {
+        user.client.disconnect(function() {
+          console.log('client disconnected for: ', user);
+        });
+      }
+
+      delete clients[socket.id];
+
     });
 
     socket.on('connectToIRC', function(data) {
