@@ -164,11 +164,12 @@ hr.intro-sep:after {
 div.channel {
   height: 500px;
   margin: 20px 0;
-  overflow: auto;
 }
 /* Message styles */
 div.channel .messages {
   border-right: 1px solid #e3e3e3;
+  overflow: auto;
+  height: 500px;
 }
 div.channel[data-channel='#root'] .messages {
   border-right: none;
@@ -214,6 +215,10 @@ div.wrap:after {
   height: 100px;
 }
 /* Names sidebar styles */
+div.names {
+  overflow: auto;
+  height: 500px;
+}
 li.nick {
   font-weight: bold;
 }

@@ -18,7 +18,8 @@ jQuery(document).ready(function($) {
         footerHeight    = $('footer').height(),
         leftOver        = 152, // message input + paddings
         calcHeight      = viewHeight - wrapperOffset - footerHeight - leftOver;
-    $('#channel-containers').css('height', calcHeight);
+    $('#channel-containers .channel .messages').css('height', calcHeight);
+    $('#channel-containers .channel .names').css('height', calcHeight);
   }
 
   setContainerHeight();
@@ -59,12 +60,12 @@ jQuery(document).ready(function($) {
 
   // Escape HTML from: https://github.com/janl/mustache.js/blob/master/mustache.js#L43
   var entityMap = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
     '"': '&quot;',
     "'": '&#39;',
-    "/": '&#x2F;'
+    '/': '&#x2F;'
   };
 
   function escapeHTML(string) {
@@ -291,7 +292,7 @@ jQuery(document).ready(function($) {
     }
 
     // Keep scroll at bottom of channel window.
-    var scrollArea = $('div.channel[data-channel="' + channel + '"]');
+    var scrollArea = $('div.channel[data-channel="' + channel + '"] .messages');
     if (scrollArea.length > 0) {
       var scrollTop  = scrollArea[0].scrollHeight;
       scrollArea.animate({'scrollTop': scrollTop}, 'slow');
@@ -379,7 +380,7 @@ jQuery(document).ready(function($) {
         inputEl = $('form.send input[name=message]'),
         val     = inputEl.val();
 
-    if (keyCode == 9) {
+    if (keyCode === 9) {
       e.preventDefault();
 
       // A value exists and the last character is not a space, try to autocomplete.
