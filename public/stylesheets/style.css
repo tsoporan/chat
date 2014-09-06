@@ -44,13 +44,22 @@
 .color_light_grey {
   color: #c9c9c9;
 }
-* {
-  font-family: "Inconsolata";
-}
 html,
 body {
   height: 100%;
   background: #fafafa;
+  font-family: 'Inconsolata';
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Inconsolata';
+}
+a {
+  font-family: 'Inconsolata';
 }
 body {
   color: #3a3a3a;
@@ -66,6 +75,9 @@ body {
 }
 .right {
   float: right;
+}
+.top-bar-section ul li > a {
+  font-family: 'Inconsolata';
 }
 .top-bar-section ul li > a.hidden {
   display: none;
@@ -83,6 +95,7 @@ body {
   text-align: center;
 }
 .button {
+  font-family: 'Inconsolata';
   background: #ff7200;
 }
 .button:hover {
@@ -100,11 +113,17 @@ body {
 .alert-text {
   font-size: 1.2em;
 }
-/* Wrapper styles */
+.alert-container {
+  margin: 30px 0;
+}
+.alert-container.fixed {
+  width: 40%;
+  left: 0;
+  right: 0;
+}
 div.wrap > div {
   height: 100%;
 }
-/* Header styles */
 #logo {
   margin: 0;
   padding: 0;
@@ -119,14 +138,6 @@ form.connect {
 h2.intro {
   font-size: 4em;
   color: #3a3a3a;
-}
-.alert-container {
-  margin: 30px 0;
-}
-.alert-container.fixed {
-  width: 40%;
-  left: 0;
-  right: 0;
 }
 hr.intro-sep {
   padding: 0;
@@ -152,7 +163,6 @@ hr.intro-sep:after {
   display: inline;
   margin: 0 10px;
 }
-/* Channel list styles */
 #channel-list {
   margin-top: 20px;
 }
@@ -168,12 +178,10 @@ hr.intro-sep:after {
   background: #3a3a3a;
   color: #fafafa;
 }
-/* Channel styles */
 div.channel {
   margin: 20px 0 0;
   height: 100%;
 }
-/* Message styles */
 div.channel .messages {
   border-right: 1px solid #e3e3e3;
   overflow: auto;
@@ -210,19 +218,6 @@ span.text {
 .message.error .timestamp {
   color: #3a3a3a;
 }
-/* Msg send form styles */
-input[name=send] {
-  padding: 10px;
-}
-/* Footer styles */
-footer {
-  border-top: 1px solid #e3e3e3;
-  height: 100px;
-}
-div.wrap:after {
-  height: 100px;
-}
-/* Names sidebar styles */
 div.names {
   overflow: auto;
   height: 100%;
@@ -233,7 +228,6 @@ li.nick {
 li.nick .mode {
   color: #ff7200;
 }
-/* Topic styles */
 div.topic {
   padding: 5px;
   margin-bottom: 10px;
@@ -243,4 +237,14 @@ div.topic {
 }
 div.topic span {
   font-style: italic;
+}
+input[name=send] {
+  padding: 10px;
+}
+footer {
+  border-top: 1px solid #e3e3e3;
+  height: 100px;
+}
+div.wrap:after {
+  height: 100px;
 }
