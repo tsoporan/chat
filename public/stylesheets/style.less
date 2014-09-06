@@ -9,6 +9,8 @@
 @dgrey  : #3A3A3A;
 @white  : #FAFAFA;
 @black  : #000000;
+@dgreen : #00AA1B;
+@lgreen : #00E224;
 
 @error : rgb(248, 58, 58);
 
@@ -44,7 +46,6 @@
 .color_pink { color: @irc_pink; }
 .color_grey { color: @irc_grey; }
 .color_light_grey { color: @irc_light_grey; }
-
 
 // Global styles
 html, body {
@@ -107,7 +108,7 @@ body {
 
 .button {
   font-family: @monospace;
-  background: @orange;
+  background: @dgreen;
 }
 
 .button:hover {
@@ -147,13 +148,19 @@ div.wrap > div {
 }
 
 // Header styles
+
+.top-bar {
+  height: 50px;
+  border-bottom: 3px solid @dgreen;
+}
+
 #logo {
   margin: 0;
   padding: 0;
   font-size: 3em;
   font-family: 'Inconsolata';
   font-weight: bold;
-  color: @orange;
+  color: @lgreen;
 }
 
 form.connect {
@@ -277,7 +284,7 @@ li.nick {
   font-weight: bold;
 }
 li.nick .mode {
-  color: @orange;
+  color: @dgreen;
 }
 
 // Topic styles
@@ -287,10 +294,6 @@ div.topic {
   min-height: 10px;
   background: @lgrey;
   font-weight: bold;
-}
-
-div.topic span {
-    font-style: italic;
 }
 
 // Send form styles

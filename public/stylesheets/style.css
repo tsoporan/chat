@@ -96,7 +96,7 @@ body {
 }
 .button {
   font-family: 'Inconsolata';
-  background: #ff7200;
+  background: #00aa1b;
 }
 .button:hover {
   background: #3a3a3a;
@@ -124,13 +124,17 @@ body {
 div.wrap > div {
   height: 100%;
 }
+.top-bar {
+  height: 50px;
+  border-bottom: 3px solid #00aa1b;
+}
 #logo {
   margin: 0;
   padding: 0;
   font-size: 3em;
   font-family: 'Inconsolata';
   font-weight: bold;
-  color: #ff7200;
+  color: #00e224;
 }
 form.connect {
   margin: 20px;
@@ -226,7 +230,7 @@ li.nick {
   font-weight: bold;
 }
 li.nick .mode {
-  color: #ff7200;
+  color: #00aa1b;
 }
 div.topic {
   padding: 5px;
@@ -234,9 +238,6 @@ div.topic {
   min-height: 10px;
   background: #e3e3e3;
   font-weight: bold;
-}
-div.topic span {
-  font-style: italic;
 }
 input[name=send] {
   padding: 10px;
