@@ -261,11 +261,84 @@ io.on('connection', function(socket) {
           cmdPart = parts[0],
           cmdArgs = parts.slice(1);
 
+
+      var doJoin = function doJoin() {
+
+        var newChannels = '';
+        var user = clients[socket.id];
+        var exists;
+
+        for (var i = 0; i < cmdArgs.length; i++) {
+          var channelName = cmdArgs[i];
+
+          if (channelName.indexOf('#') !== 0) {
+            channelName = '#' + channelName;
+          }
+
+          // Only join new channels.
+          exists = channelName in user.channels;
+          if (!exists) {
+            newChannels += channelName +',';
+          }
+        }
+
+        client.send('JOIN', newChannels);
+
+      };
+
+      var doPart = function doPart() {
+
+        var reason = cmdArgs.join(' ');
+
+        client.send('PART', channel, reason);
+
+      };
+
+      var doTopic = function doTopic() {
+
+        var newTopic = cmdArgs.join(' ');
+
+        client.send('TOPIC', channel, newTopic );
+
+
+      };
+
+      var doQuit = function doQuit() {
+
+        var reason = cmdArgs.join(' ');
+
+        client.disconnect(reason, function() {
+
+          // Clean up.
+          delete clients[socket.id];
+
+          socket.emit('ircQuit', {
+            us : true,
+          });
+        });
+
+      };
+
+      var doNick = function doNick() {
+
+        var newNick = cmdArgs.join('_');
+
+        client.send('NICK', newNick);
+
+      };
+
+
       var cmdMapping = {
-        '/join' : 'JOIN',
-        '/part' : 'PART',
-        '/topic': 'TOPIC',
-        '/quit' : 'QUIT',
+        '/join' : doJoin,
+        '/j'    : doJoin,
+        '/part' : doPart,
+        '/p'    : doPart,
+        '/topic': doTopic,
+        '/t'    : doTopic,
+        '/quit' : doQuit,
+        '/q'    : doQuit,
+        '/nick' : doNick,
+        '/n'    : doNick,
       };
 
       var sendError = function(channel, msg) {
@@ -276,63 +349,10 @@ io.on('connection', function(socket) {
         });
       };
 
-      switch (cmdPart) {
-        case '/join':
-
-          var newChannels = '';
-          var user = clients[socket.id];
-          var exists;
-
-          for (var i = 0; i < cmdArgs.length; i++) {
-            var channelName = cmdArgs[i];
-
-            if (channelName.indexOf('#') !== 0) {
-              channelName = '#' + channelName;
-            }
-
-            // Only join new channels.
-            exists = channelName in user.channels;
-            if (!exists) {
-              newChannels += channelName +',';
-            }
-          }
-
-          client.send(cmdMapping[cmdPart], newChannels);
-
-          break;
-
-        case '/part':
-
-          client.send(cmdMapping[cmdPart], channel);
-
-          break;
-
-        case '/quit':
-
-          var reason = cmdArgs.join(' ');
-
-          client.disconnect(reason, function() {
-
-            // Clean up.
-            delete clients[socket.id];
-
-            socket.emit('ircQuit', {
-              us : true,
-            });
-          });
-
-          break;
-
-        case '/topic':
-
-          var newTopic = cmdArgs.join(' ');
-
-          client.send(cmdMapping[cmdPart], channel, newTopic );
-
-          break;
-
-        default:
-          console.log('default case?');
+      if (cmdPart in cmdMapping) {
+        return cmdMapping[cmdPart]();
+      } else {
+        return sendError(channel, 'Command "' + cmdPart + '" is not recognized.');
       }
 
     });
