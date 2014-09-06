@@ -6,10 +6,11 @@ var gulp   = require('gulp'),
     gutil  = require('gulp-util'),
     less   = require('gulp-less'),
     minify = require('gulp-minify-css'),
-    hint   = require('gulp-jshint');
+    hint   = require('gulp-jshint'),
+    rev    = require('gulp-rev');
 
 gulp.task('clean', function() {
-    return gulp.src(['public/javascripts/build', 'public/stylesheets/build'], {read: false})
+    return gulp.src(['public/build',], {read: false})
     .pipe(clean());
 
 });
@@ -24,7 +25,7 @@ gulp.task('css', function() {
   return gulp.src(['public/stylesheets/vendor/**/*.css', 'public/stylesheets/*.css'])
   .pipe(minify())
   .pipe(concat('build.min.css'))
-  .pipe(gulp.dest('public/stylesheets/build/'));
+  .pipe(gulp.dest('public/build'));
 });
 
 gulp.task('lint', function() {
@@ -47,9 +48,17 @@ gulp.task('js', function() {
     .pipe(concat('build.js'))
     .pipe(uglify())
     .pipe(rename('build.min.js'))
-    .pipe(gulp.dest('public/javascripts/build'))
+    .pipe(gulp.dest('public/build'))
     .on('error', gutil.log);
 });
 
+gulp.task('rev', ['css', 'js'], function() {
+  return gulp.src(['public/build/*.js', 'public/build/*.css'], {base: 'public/build'})
+  .pipe(gulp.dest('public/build'))
+  .pipe(rev())
+  .pipe(gulp.dest('public/build'))
+  .pipe(rev.manifest())
+  .pipe(gulp.dest('public/build'))
+});
 
-gulp.task('default', ['clean', 'less', 'css', 'lint', 'js']);
+gulp.task('default', ['clean', 'less', 'css', 'lint', 'js', 'rev']);
