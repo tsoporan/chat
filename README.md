@@ -3,6 +3,7 @@
 
 A web interface for IRC! Using node.js, express, websockets, and foundation.
 
+![image of #chat](http://i.imgur.com/vf7lUOz.png)
 
 Getting started:
 ----------------
