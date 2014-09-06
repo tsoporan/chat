@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
 
   // Take care of screen resizes for chat window.
   $(window).on('resize', function() {
-    setContainerHeight();
+    setContainerHeight(window.location.hash);
   });
 
   // Switch channel on hash change.
@@ -122,8 +122,15 @@ jQuery(document).ready(function($) {
   }
 
   function closeAlert(label) {
-    var el = $('.alert-box.' + label + ' .close');
-    el.click();
+    if (label) {
+      var el = $('.alert-box.' + label + ' .close');
+      el.click();
+    } else { // Close all.
+      var els = $('.alert-box .close');
+      els.each(function(i, el) {
+        el.click();
+      });
+    }
   }
 
   function addToNames(nickObj) {
@@ -780,8 +787,15 @@ jQuery(document).ready(function($) {
         type = data.type,
         when = data.when;
 
-    // TODO: display these to user
     console.log('*** sysMessage: ', msg, type, when);
+
+    closeAlert();
+    createAlert({
+      msg   : msg,
+      level : type,
+      label : 'couldnotconnect',
+    });
+
   });
 
   socket.on('ircError', function(data) {

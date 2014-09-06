@@ -7,6 +7,7 @@ var http       = require('http'),
     moment     = require('moment'),
     httpServer = http.Server(app),
     io         = socketio(httpServer),
+    connected  = false,
     clients    = {};
 
 
@@ -47,6 +48,7 @@ io.on('connection', function(socket) {
         return false;
       }
 
+
       channels = channels.split(',');
 
       // Create IRC client
@@ -61,6 +63,18 @@ io.on('connection', function(socket) {
           userName   : nick,
           realName   : nick
       });
+
+    // Make sure we are connected in at least 10 seconds
+    // or else something is wrong.
+    setTimeout(function() {
+      if (!connected) {
+        socket.emit('systemMessage', {
+          type: 'alert',
+          msg : 'Could not connect! Check the information and try again.',
+          when: moment(),
+        });
+      }
+    }, 10000);
 
     client.on('error', function(err) {
       // IRC error handling.
@@ -206,6 +220,7 @@ io.on('connection', function(socket) {
           serverMsg,
           nick;
 
+      connected  = true;
       server     = welcome.server;
       nick       = welcome.args[0];
       serverMsg  = welcome.args[1];
