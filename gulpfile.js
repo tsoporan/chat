@@ -58,7 +58,7 @@ gulp.task('rev', ['css', 'js'], function() {
   .pipe(rev())
   .pipe(gulp.dest('public/build'))
   .pipe(rev.manifest())
-  .pipe(gulp.dest('public/build'))
+  .pipe(gulp.dest('public/build'));
 });
 
 gulp.task('default', ['clean', 'less', 'css', 'lint', 'js', 'rev']);

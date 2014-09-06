@@ -98,12 +98,19 @@ body {
   font-size: 1.2em;
 }
 
+/* Wrapper styles */
+
+div.wrap > div {
+  height: 100%;
+}
+
 /* Header styles */
 #logo {
   margin: 0;
   padding: 0;
   font-size: 3em;
-  font-family: 'Lobster', cursive;
+  font-family: 'Inconsolata';
+  font-weight: bold;
   color: @orange;
 }
 
@@ -169,15 +176,15 @@ hr.intro-sep:after {
 }
 /* Channel styles */
 div.channel {
-  height: 500px;
-  margin: 20px 0;
+  margin: 20px 0 0;
+  height: 100%;
 }
 
 /* Message styles */
 div.channel .messages {
     border-right: 1px solid @lgrey;
     overflow: auto;
-    height: 500px;
+    height: 100%;
 }
 
 div.channel[data-channel='#root'] .messages {
@@ -232,7 +239,7 @@ div.wrap:after {
 /* Names sidebar styles */
 div.names {
   overflow: auto;
-  height: 500px;
+  height: 100%;
 }
 
 li.nick {

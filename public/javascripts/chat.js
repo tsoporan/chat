@@ -12,17 +12,20 @@ jQuery(document).ready(function($) {
     return this.indexOf(str) === 0;
   };
 
-  function setContainerHeight() {
-    var viewHeight      = $(window).innerHeight(),
-        wrapperOffset   = $('div.wrap').offset().top,
-        footerHeight    = $('footer').height(),
-        leftOver        = 152, // message input + paddings
-        calcHeight      = viewHeight - wrapperOffset - footerHeight - leftOver;
-    $('#channel-containers .channel .messages').css('height', calcHeight);
-    $('#channel-containers .channel .names').css('height', calcHeight);
-  }
+  function setContainerHeight(channel) {
+    var windowHeight = $(window).height(),
+        headerHeight = $('.top-bar').height(),
+        extraPadding = 80,
+        wrapper      = $('div.wrap'),
+        messages     = $('div.channel[data-channel="'+channel+'"] .messages'),
+        names        = $('div.channel[data-channel="'+channel+'"] .names');
 
-  setContainerHeight();
+    wrapper.height(windowHeight - headerHeight - extraPadding);
+
+    // Set message/name height to account for the send form and padding.
+    messages.height(wrapper.height() - 150);
+    names.height(wrapper.height() - 150);
+  }
 
   // Take care of screen resizes for chat window.
   $(window).on('resize', function() {
@@ -445,7 +448,11 @@ jQuery(document).ready(function($) {
     // Add the root channel.
     var channel     = '#root',
         channelCont = $('#channel-containers'),
-        channelHTML = '<div class="channel" data-channel="' + channel + '"><div class="messages"><ul class="no-bullet"></ul></div></div>',
+        channelHTML = '<div class="channel" data-channel="' + channel + '">' +
+                        '<div class="messages">' +
+                          '<ul class="no-bullet"></ul>' +
+                        '</div>' +
+                      '</div>',
         channelList = $('#channel-list'),
         linkHTML    = '<li data-channel="'+ channel +'" class="channel">' +
                       '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
@@ -460,12 +467,15 @@ jQuery(document).ready(function($) {
     var existingChannel =  channelCont.find('div[data-channel="' + channel + '"]').length;
     if (!existingChannel) {
       channelCont.append(channelHTML);
+      setContainerHeight(channel);
     }
 
     postToChannel(msgObj);
 
     // Show the post form.
-    $('form.send').fadeIn('slow');
+    $('form.send').fadeIn('slow', function() {
+    });
+
   });
 
   socket.on('ircMOTD', function(data) {
@@ -512,7 +522,7 @@ jQuery(document).ready(function($) {
     console.log('channel messages', channels[channel].messages);
 
   });
-  
+
   socket.on('ircNames', function(data) {
     var channel       = data.channel,
         nicks         = data.nicks,
@@ -593,13 +603,15 @@ jQuery(document).ready(function($) {
       var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
       if (!existingChannel) {
         channelCont.append(channelHTML);
+        setContainerHeight(channel);
       }
       if (window.location.hash === channel) {
         existingChannelLink.removeClass('selected').addClass('selected');
       } else {
         window.location.hash = channel;
       }
-  
+
+
     } else {
 
       // Someone else has joined.
