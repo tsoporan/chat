@@ -247,18 +247,24 @@ io.on('connection', function(socket) {
           users= [];
 
       for (var nick in nicks) {
-        if (nicks[nick]) {// hase mode
+        if (nicks[nick]) {// has mode
           mods.push([nick, nicks[nick]]);
         } else {
           users.push(nick);
         }
       }
 
+      var symbolWeights = { '~': 1, '&': 2, '@': 3, '%': 4, '+': 5 };
+
       // Sort modded.
-      mods.sort();
+      mods.sort(function(a, b) {
+        return symbolWeights[a[1]] - symbolWeights[b[1]];
+      });
 
       // Sort users
-      users.sort();
+      users.sort(function(a, b) {
+        return a.toLowerCase() > b.toLowerCase() ? 1 : -1;
+      });
 
       // Send a list of nicks in channel.
       socket.emit('ircNames', {

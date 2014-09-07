@@ -591,23 +591,26 @@ jQuery(document).ready(function($) {
         mods          = data.mods,
         users         = data.users,
         when          = data.when,
-        nameContainer = $('div.channel[data-channel="' + channel + '"] div.names ul');
+        nameContainer = $('div.channel[data-channel="' + channel + '"] div.names ul'),
+        nickHTML,
+        nick,
+        mode;
 
     // Show modded nicks first.
     for (var i in mods) {
-      var nick = mods[i][0],
-          mode = mods[i][1];
+      nick = mods[i][0];
+      mode = mods[i][1];
 
-      var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
+      nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
       nameContainer.append(nickHTML);
     }
 
     // Show remaining users under modded nicks.
     for (var j in users) {
-      var mode = '',
-          nick = users[j];
+      nick = users[j];
+      mode = '';
 
-      var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
+      nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
       nameContainer.append(nickHTML);
     }
 
