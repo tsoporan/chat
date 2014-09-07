@@ -243,10 +243,28 @@ io.on('connection', function(socket) {
 
     client.on('names', function(channel, nicks) {
 
+      var mods = [],
+          users= [];
+
+      for (var nick in nicks) {
+        if (nicks[nick]) {// hase mode
+          mods.push([nick, nicks[nick]]);
+        } else {
+          users.push(nick);
+        }
+      }
+
+      // Sort modded.
+      mods.sort();
+
+      // Sort users
+      users.sort();
+
       // Send a list of nicks in channel.
       socket.emit('ircNames', {
         channel : channel,
-        nicks   : nicks,
+        mods    : mods,
+        users   : users,
         when    : moment(),
       });
 

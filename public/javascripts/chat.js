@@ -588,14 +588,25 @@ jQuery(document).ready(function($) {
 
   socket.on('ircNames', function(data) {
     var channel       = data.channel,
-        nicks         = data.nicks,
+        mods          = data.mods,
+        users         = data.users,
         when          = data.when,
         nameContainer = $('div.channel[data-channel="' + channel + '"] div.names ul');
 
-    console.log('ircNames', data);
+    // Show modded nicks first.
+    for (var i in mods) {
+      var nick = mods[i][0],
+          mode = mods[i][1];
 
-    for (var nick in nicks) {
-      var mode = nicks[nick];
+      var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
+      nameContainer.append(nickHTML);
+    }
+
+    // Show remaining users under modded nicks.
+    for (var j in users) {
+      var mode = '',
+          nick = users[j];
+
       var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
       nameContainer.append(nickHTML);
     }
