@@ -55,6 +55,46 @@ jQuery(document).ready(function($) {
     }
   });
 
+  // Handle predefined networks.
+  $('.popular-networks li div').on('click', function(e) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    var networkLookup = {
+      'hashbang': function() {
+        connectToIRC({
+          server : 'irc.hashbang.sh:7777',
+          channels: '#!',
+        });
+      },
+      'freenode': function() {
+        connectToIRC({
+          server: 'irc.freenode.net',
+        });
+      },
+      'quakenet': function() {
+        connectToIRC({
+          server: 'irc.quakenet.org',
+        });
+      },
+      'efnet'   : function() {
+        connectToIRC({
+          server: 'irc.efnet.org',
+        });
+      },
+    };
+
+    var network = $(this).text();
+
+    if (network in networkLookup) {
+      return networkLookup[network]();
+    }
+
+    return false;
+  });
+
+
   function appendHTML(containers, html) {
     containers.each(function(i, el) {
       $(el).append(html);
@@ -310,22 +350,25 @@ jQuery(document).ready(function($) {
 
   }
 
+  function connectToIRC(opts) {
+    socket.emit('connectToIRC', opts);
+    closeAlert('disconnected');
+    createAlert({ msg: 'Connecting to '+ opts.server + ' ...', level: 'warning', label: 'connecting'});
+  }
+
   // Connecting to IRC from web.
   $('form.connect').on('valid.fndtn.abide', function() {
     var server     = $('input[name=server]').val(),
         channels   = $('input[name=channels]').val(),
         socketNick = $('input[name=nickName]').val();
 
-    socket.emit('connectToIRC', {
+    $('a.close-reveal-modal').click();
+
+    connectToIRC({
       server  : server,
       channels: channels,
       nick    : socketNick
     });
-
-    $('a.close-reveal-modal').click();
-
-    closeAlert('disconnected');
-    createAlert({ msg: 'Connecting ...', level: 'warning', label: 'connecting'});
 
     return false;
   });
@@ -418,7 +461,8 @@ jQuery(document).ready(function($) {
     var when         = data.when,
         server       = data.server,
         serverMsg    = data.serverMsg,
-        clientsCount = data.clientsCount;
+        clientsCount = data.clientsCount,
+        gotChannels  = data.channels.length;
 
     var msgObj = {
       channel : '#root',
@@ -432,7 +476,10 @@ jQuery(document).ready(function($) {
 
     // Close connecting show connected.
     closeAlert('connecting');
-    createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
+
+    if (gotChannels) {
+      createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
+    }
 
     // Hide the connect and show the user menu.
     $('#connect').addClass('hidden');
@@ -787,7 +834,7 @@ jQuery(document).ready(function($) {
         type = data.type,
         when = data.when;
 
-    console.log('*** sysMessage: ', msg, type, when);
+    console.log('*** sysMessage: ', data);
 
     closeAlert();
     createAlert({
@@ -799,9 +846,13 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('ircError', function(data) {
-    var msg  = data.msg,
-        when = data.when;
+    var msg     = data.msg,
+        channel = data.channel,
+        nick    = data.nick,
+        all     = data.all,
+        when    = data.when;
 
+    console.log('*** ircError : ', data);
 
     var msgObj =  {
       msg  : msg,
@@ -818,6 +869,8 @@ jQuery(document).ready(function($) {
         msg     = data.msg,
         when    = data.when;
 
+    console.log('*** commandError :', data);
+
     var msgObj = {
       channel: channel,
       msg    : msg,
@@ -827,7 +880,6 @@ jQuery(document).ready(function($) {
 
     postToChannel(msgObj);
 
-    console.log('*** commandError', data);
   });
 
   // Handle socket connect/reconnect/disconnects.

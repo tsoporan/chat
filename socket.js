@@ -8,7 +8,9 @@ var http       = require('http'),
     httpServer = http.Server(app),
     io         = socketio(httpServer),
     connected  = false,
-    clients    = {};
+    clients    = {},
+    nickPool   = [],
+    guestInt   = 0;
 
 
 // On connection store the socket and newly created client
@@ -31,6 +33,7 @@ io.on('connection', function(socket) {
     });
 
     socket.on('connectToIRC', function(data) {
+
       var server   = data.server.split(':')[0],
           port     = data.server.split(':')[1] || 6667,
           channels = data.channels,
@@ -48,8 +51,19 @@ io.on('connection', function(socket) {
         return false;
       }
 
+      // If we don't have a nick at this point set a guest one.
+      if (!nick) {
+        nick = 'Guest' + guestInt;
+        guestInt++;
+      }
+      nickPool.push(nick);
 
-      channels = channels.split(',');
+      // Account for no channels passed, in this case we just join the network.
+      if (channels) {
+        channels = channels.split(',');
+      } else {
+        channels = [];
+      }
 
       // Create IRC client
       var client = new irc.Client(
@@ -64,9 +78,14 @@ io.on('connection', function(socket) {
           realName   : nick
       });
 
-    // Make sure we are connected in at least 10 seconds
+      client._joiningChannels = channels;
+
+    // Make sure we are connected in at least 15 seconds
     // or else something is wrong.
-    setTimeout(function() {
+    if (client._checkConn) {
+      clearTimeout(client._checkConn);
+    }
+    client._checkConn = setTimeout(function() {
       if (!connected) {
         socket.emit('systemMessage', {
           type: 'alert',
@@ -74,13 +93,21 @@ io.on('connection', function(socket) {
           when: moment(),
         });
       }
-    }, 10000);
+    }, 15000);
 
     client.on('error', function(err) {
       // IRC error handling.
+      var nick    = err.args[0],
+          channel = err.args[1],
+          msg     = err.args[2],
+          all     = err.args;
+
       socket.emit('ircError', {
-        msg  : err.args[1],
-        when : moment(),
+        msg     : msg,
+        channel : channel,
+        nick    : nick,
+        all     : all,
+        when    : moment(),
       });
 
     });
@@ -216,6 +243,8 @@ io.on('connection', function(socket) {
 
     client.connect(function(welcome) {
 
+      console.log('welcome', welcome);
+
       var server,
           serverMsg,
           nick;
@@ -227,9 +256,10 @@ io.on('connection', function(socket) {
 
       // Store client
       clients[socket.id] = {
-        socket: socket,
-        client: client,
-        nick  : nick,
+        socket   : socket,
+        client   : client,
+        nick     : nick,
+        channels : [],
       };
 
       // Emit the client info to the web client.
@@ -238,7 +268,8 @@ io.on('connection', function(socket) {
         server       : server,
         serverMsg    : serverMsg,
         nick         : nick,
-        when         : moment()
+        when         : moment(),
+        channels     : client._joiningChannels,
       });
 
     });
@@ -315,6 +346,12 @@ io.on('connection', function(socket) {
           socket.emit('ircQuit', {
             us : true,
           });
+
+          if (client._checkConn) {
+            clearTimeout(client._checkConn);
+          }
+          connected = false;
+
         });
 
       };
@@ -326,7 +363,6 @@ io.on('connection', function(socket) {
         client.send('NICK', newNick);
 
       };
-
 
       var cmdMapping = {
         '/join' : doJoin,
