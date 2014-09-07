@@ -7,7 +7,6 @@ var http       = require('http'),
     moment     = require('moment'),
     httpServer = http.Server(app),
     io         = socketio(httpServer),
-    connected  = false,
     clients    = {},
     nickPool   = [],
     guestInt   = 0;
@@ -58,6 +57,8 @@ io.on('connection', function(socket) {
       }
       nickPool.push(nick);
 
+      console.log('nickPool', nickPool);
+
       // Account for no channels passed, in this case we just join the network.
       if (channels) {
         channels = channels.split(',');
@@ -86,6 +87,10 @@ io.on('connection', function(socket) {
       clearTimeout(client._checkConn);
     }
     client._checkConn = setTimeout(function() {
+
+      var user      = clients[socket.id],
+          connected = user && user.connected;
+
       if (!connected) {
         socket.emit('systemMessage', {
           type: 'alert',
@@ -205,6 +210,25 @@ io.on('connection', function(socket) {
 
     });
 
+    client.on('nick', function(oldNick, newNick, channels, message) {
+
+      var user = clients[socket.id];
+
+      // Change our nick reference.
+      if (user.nick === oldNick) {
+          clients[socket.id].nick = newNick;
+      }
+
+      // Send the new nick change.
+      socket.emit('ircNick', {
+        oldNick : oldNick,
+        newNick : newNick,
+        channels: channels,
+        when    : moment()
+      });
+
+    });
+
     client.on('motd', function(motd) {
 
       // Send the message of the day.
@@ -249,7 +273,6 @@ io.on('connection', function(socket) {
           serverMsg,
           nick;
 
-      connected  = true;
       server     = welcome.server;
       nick       = welcome.args[0];
       serverMsg  = welcome.args[1];
@@ -260,6 +283,7 @@ io.on('connection', function(socket) {
         client   : client,
         nick     : nick,
         channels : [],
+        connected: true,
       };
 
       // Emit the client info to the web client.
@@ -350,7 +374,6 @@ io.on('connection', function(socket) {
           if (client._checkConn) {
             clearTimeout(client._checkConn);
           }
-          connected = false;
 
         });
 
