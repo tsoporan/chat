@@ -103,12 +103,12 @@ jQuery(document).ready(function($) {
 
   // Escape HTML from: https://github.com/janl/mustache.js/blob/master/mustache.js#L43
   var entityMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    '/': '&#x2F;'
+    '&' : '&amp;',
+    '<' : '&lt;',
+    '>' : '&gt;',
+    '"' : '&quot;',
+    '\'': '&#39;',
+    '/' : '&#x2F;'
   };
 
   function escapeHTML(string) {
@@ -136,7 +136,6 @@ jQuery(document).ready(function($) {
         'grey',
         'light_grey'
       ];
-
 
       // Return a randomized color.
       return colors[Math.floor(Math.random() * (colors.length - 1))];
@@ -182,8 +181,22 @@ jQuery(document).ready(function($) {
         nickHTML       = '',
         nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul');
 
-    nickHTML = '<li class="nick ltext" data-nick="'+ nick +'"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+    nickHTML = '<li class="nick ltext" data-nick="'+ nick +'"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
     nameContainer.append(nickHTML);
+
+  }
+
+  function changeName(nickObj) {
+    var channel        = nickObj.channel,
+        oldNick        = nickObj.oldNick,
+        nick           = nickObj.nick,
+        nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul'),
+        exists         = nameContainer.find('li[data-nick="'+ oldNick +'"]');
+
+    if (exists.length) {
+      exists.attr('data-nick', nick);
+      exists.find('.nick-text').text(nick);
+    }
 
   }
 
@@ -397,10 +410,6 @@ jQuery(document).ready(function($) {
           channel: channel,
           command: msg,
       });
-
-      msgObj.type = 'system';
-      msgObj.msg  = 'Issued command: ' + msg;
-
     } else if (msg) {
       console.log('sending message ...', msg);
       socket.emit('webMessage', {
@@ -410,12 +419,12 @@ jQuery(document).ready(function($) {
 
       msgObj.type = 'user';
       msgObj.msg  = msg;
+
+      postToChannel(msgObj);
     }
 
     // Clear out message area.
     el.val('');
-
-    postToChannel(msgObj);
 
     var cached = nickCache[socketNick];
     if (!cached) {
@@ -445,7 +454,7 @@ jQuery(document).ready(function($) {
 
         if (match) {
           // Plug in the value.
-          var newVal = val.split(' ').slice(0, -1).join(' ') + match + ' ';
+          var newVal = val.split(' ').slice(0, -1).join(' ') + ' ' +  match + ' ';
           inputEl.val(newVal);
         }
       }
@@ -484,7 +493,7 @@ jQuery(document).ready(function($) {
     // Hide the connect and show the user menu.
     $('#connect').addClass('hidden');
 
-    var menuHTML = '<a>Hi, ' + socketNick + '</a>' +
+    var menuHTML = '<a>Hi, <span class="menu-nick bold">' + socketNick + '</span></a>' +
                    '<ul class="dropdown">'+
                    '<li><a id="disconnect">Disconnect</a></li>' +
                    '</ul>';
@@ -587,8 +596,43 @@ jQuery(document).ready(function($) {
 
     for (var nick in nicks) {
       var mode = nicks[nick];
-      var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> ' + nick + '</li>';
+      var nickHTML = '<li class="nick ltext" data-nick="' + nick + '"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
       nameContainer.append(nickHTML);
+    }
+
+  });
+
+
+  socket.on('ircNick', function(data) {
+    console.log('ircNick', data);
+
+    var oldNick  = data.oldNick,
+        newNick  = data.newNick,
+        channels = data.channels,
+        us       = data.us,
+        when     = data.when;
+
+
+    if (us) {
+      socketNick = newNick;
+      $('.menu-nick').text(newNick);
+    }
+
+    var msgObj = {
+      msg : oldNick + ' changed their name to: ' + newNick,
+      type: 'system',
+      when: when
+    };
+
+    if (channels.length) {
+      $.each(channels, function(i, channel) {
+        msgObj.channel = channel;
+        changeName({ channel: channel, oldNick: oldNick, nick: newNick });
+        postToChannel(msgObj);
+
+      });
+    } else {
+      postToChannel(msgObj); // Post to root window.
     }
 
   });
@@ -728,7 +772,7 @@ jQuery(document).ready(function($) {
       var msgObj = {
         channel : channel,
         msg     : nick + ' has left the room! Reason: ' + reason,
-        type    : 'system', 
+        type    : 'system',
         when    : when,
       };
 

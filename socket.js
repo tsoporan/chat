@@ -212,20 +212,23 @@ io.on('connection', function(socket) {
 
     client.on('nick', function(oldNick, newNick, channels, message) {
 
-      var user = clients[socket.id];
+      var user   = clients[socket.id],
+          toSend = {
+            oldNick : oldNick,
+            newNick : newNick,
+            channels: channels,
+            when    : moment(),
+          };
 
       // Change our nick reference.
       if (user.nick === oldNick) {
           clients[socket.id].nick = newNick;
+
+          toSend.us = true;
       }
 
       // Send the new nick change.
-      socket.emit('ircNick', {
-        oldNick : oldNick,
-        newNick : newNick,
-        channels: channels,
-        when    : moment()
-      });
+      socket.emit('ircNick', toSend);
 
     });
 
