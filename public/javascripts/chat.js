@@ -29,12 +29,23 @@ jQuery(document).ready(function($) {
 
   // Take care of screen resizes for chat window.
   $(window).on('resize', function() {
-    setContainerHeight(window.location.hash);
+    setContainerHeight(history.state.channel);
   });
 
   // Switch channel on hash change.
-  $(window).on('hashchange', function() {
-    var channel = location.hash || '#root';
+  $(window).on('pathchange', function() {
+
+    var channel;
+
+    if (!history.state) {
+      return;
+    }
+
+    if (history.state.root) {
+      channel = 'main';
+    } else {
+      channel = history.state.channel;
+    }
 
     var channelEl = $('div[data-channel="' + channel + '"]');
 
@@ -53,6 +64,11 @@ jQuery(document).ready(function($) {
       channelEl.removeClass('hidden');
 
     }
+  });
+
+  // Listen to HTML5 popstate
+  $(window).on('popstate', function() {
+    $(window).trigger('pathchange');
   });
 
   // Handle predefined networks.
@@ -173,7 +189,6 @@ jQuery(document).ready(function($) {
   }
 
   function addToNames(nickObj) {
-    console.log('add to names', nickObj);
 
     var channel        = nickObj.channel,
         nick           = nickObj.nick,
@@ -201,7 +216,6 @@ jQuery(document).ready(function($) {
   }
 
   function removeFromNames(nickObj) {
-    console.log('remove from names', nickObj);
 
     var channel        = nickObj.channel,
         nick           = nickObj.nick,
@@ -227,8 +241,6 @@ jQuery(document).ready(function($) {
     if (namesEls.length) {
       namesEls.each(function(i, el) {
         var nameText = $(el).attr('data-nick').toLowerCase();
-
-        console.log('nameText', nameText);
 
         names.push(nameText);
       });
@@ -394,7 +406,7 @@ jQuery(document).ready(function($) {
     var val = el.val();
 
     // Get the channel from the URL
-    var channel   = location.hash || '#root';
+    var channel   = history.state.channel || 'main';
     var msg       = val;
     var isCommand = msg.indexOf('/') === 0;
 
@@ -448,7 +460,7 @@ jQuery(document).ready(function($) {
       // A value exists and the last character is not a space, try to autocomplete.
       if (val && val[val.length-1] !== " ") {
 
-        var channel = window.location.hash,
+        var channel = history.state.channel,
             word    = val.split(' ').slice(-1), // We only want the last word to autocomplete.
             match   = nameComplete(word, channel);
 
@@ -462,7 +474,7 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('ircConnected', function(data) {
-    console.log('info received', data);
+    console.log('*** ircConnected', data);
 
     connected  = true;
     socketNick = data.nick;
@@ -474,7 +486,7 @@ jQuery(document).ready(function($) {
         gotChannels  = data.channels.length;
 
     var msgObj = {
-      channel : '#root',
+      channel : 'main',
       msg     : serverMsg,
       type    : 'system',
       when    : when,
@@ -506,10 +518,8 @@ jQuery(document).ready(function($) {
       return false;
     });
 
-    console.log('msgObj', msgObj);
-
-    // Add the root channel.
-    var channel     = '#root',
+    // Add the main channel.
+    var channel     = 'main',
         channelCont = $('#channel-containers'),
         channelHTML = '<div class="channel" data-channel="' + channel + '">' +
                         '<div class="messages">' +
@@ -525,6 +535,17 @@ jQuery(document).ready(function($) {
     var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]').length;
     if (!existingChannelLink) {
       channelList.append(linkHTML);
+
+      $('#channel-list li[data-channel="'+channel+'"] a').on('click', function(e) {
+        var channel = $(this).attr('href');
+
+        history.pushState({ root: true }, '', '/');
+
+        $(window).trigger('pathchange');
+
+        return false;
+      });
+
     }
 
     var existingChannel =  channelCont.find('div[data-channel="' + channel + '"]').length;
@@ -533,21 +554,23 @@ jQuery(document).ready(function($) {
       setContainerHeight(channel);
     }
 
+    history.pushState({ root: true }, '', '/');
+    $(window).trigger('pathchange');
+
     postToChannel(msgObj);
 
     // Show the post form.
-    $('form.send').fadeIn('slow', function() {
-    });
+    $('form.send').fadeIn('slow');
 
   });
 
   socket.on('ircMOTD', function(data) {
-    console.log('ircMOTD', data);
+    console.log('*** ircMOTD', data);
     var motd = data.motd,
         when = data.when;
 
     var msgObj = {
-      channel : '#root',
+      channel : 'main',
       msg     : motd,
       type    : 'system',
       when    : when,
@@ -563,7 +586,7 @@ jQuery(document).ready(function($) {
         nick    = data.nick,
         when    = data.when;
 
-    console.log('message received', data);
+    console.log('*** ircMessage', data);
 
     var msgObj  = {
       msg       : msg,
@@ -581,8 +604,6 @@ jQuery(document).ready(function($) {
     }
 
     postToChannel(msgObj);
-
-    console.log('channel messages', channels[channel].messages);
 
   });
 
@@ -618,7 +639,7 @@ jQuery(document).ready(function($) {
 
 
   socket.on('ircNick', function(data) {
-    console.log('ircNick', data);
+    console.log('*** ircNick', data);
 
     var oldNick  = data.oldNick,
         newNick  = data.newNick,
@@ -659,7 +680,7 @@ jQuery(document).ready(function($) {
         rawMsg         = data.message,
         topicContainer = $('div.channel[data-channel="'+ channel +'"] div.topic span');
 
-    console.log('ircTopic', data);
+    console.log('*** ircTopic', data);
     topicContainer.empty();
     topicContainer.append(topic);
 
@@ -677,7 +698,7 @@ jQuery(document).ready(function($) {
 
 
   socket.on('ircJoin', function(data) {
-    console.log('ircJoin', data);
+    console.log('*** ircJoin', data);
 
     closeAlert('connected');
 
@@ -710,6 +731,18 @@ jQuery(document).ready(function($) {
       var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
       if (!existingChannelLink.length) {
         channelList.append(linkHTML);
+
+        // Add click behaviour for channel list.
+        $('#channel-list li[data-channel="'+channel+'"] a').on('click', function(e) {
+          var channel = $(this).attr('href');
+
+          history.pushState({ channel: channel }, '', '/channel/' + channel + '/');
+
+          $(window).trigger('pathchange');
+
+          return false;
+        });
+
       }
 
       var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
@@ -717,10 +750,11 @@ jQuery(document).ready(function($) {
         channelCont.append(channelHTML);
         setContainerHeight(channel);
       }
-      if (window.location.hash === channel) {
+      if (history.state.channel === channel) {
         existingChannelLink.removeClass('selected').addClass('selected');
       } else {
-        window.location.hash = channel;
+        history.pushState({ channel: channel }, '', '/channel/' + channel + '/');
+        $(window).trigger('pathchange');
       }
 
 
@@ -744,7 +778,7 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('ircPart', function(data) {
-    console.log('ircPart', data);
+    console.log('*** ircPart', data);
 
     var channel = data.channel,
         when    = data.when,
@@ -756,7 +790,6 @@ jQuery(document).ready(function($) {
       // Remove local copy.
       if (channel in channels) {
         delete channels[channel];
-        console.log('removed channel from local', channels);
       }
 
       // Remove UI els.
@@ -772,10 +805,11 @@ jQuery(document).ready(function($) {
           channelContEl.remove();
 
           // Unhide root window.
-          $('#channel-containers div[data-channel="#root"]').removeClass('hidden');
+          $('#channel-containers div[data-channel="main"]').removeClass('hidden');
 
           // Move back to root channel.
-          window.location.hash = '#root';
+          history.pushState({ root: true } , '', '/');
+          $(window).trigger('pathchange');
 
         });
 
@@ -799,7 +833,7 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('ircQuit', function(data) {
-    console.log('ircQuit', data);
+    console.log('*** ircQuit', data);
 
     var nick         = data.nick,
         leftChannels = data.channels, // Channels left
@@ -839,7 +873,7 @@ jQuery(document).ready(function($) {
       connected  = false;
       socketNick = null;
 
-      window.location.hash = '#';
+      history.pushState(null, null, '/');
 
     } else {
       // Someone else quit.
@@ -863,7 +897,7 @@ jQuery(document).ready(function($) {
   });
 
   socket.on('ircDisconnected', function(data) {
-    console.log('disconnect received');
+    console.log('*** ircDisconnected', data);
     connected = false;
 
     var when = data.when;
@@ -905,17 +939,18 @@ jQuery(document).ready(function($) {
 
   socket.on('ircError', function(data) {
     var msg     = data.msg,
-        channel = data.channel,
+        channel = data.channel || 'main',
         nick    = data.nick,
         all     = data.all,
         when    = data.when;
 
     console.log('*** ircError : ', data);
 
-    var msgObj =  {
-      msg  : msg,
-      when : when,
-      type : 'error',
+    var msgObj = {
+      channel : channel,
+      msg     : msg,
+      when    : when,
+      type    : 'error',
     };
 
     postToChannel(msgObj);
