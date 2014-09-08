@@ -210,6 +210,7 @@ io.on('connection', function(socket) {
       if (user.nick === to) {
         // Sending a PM to us.
         toSend.us = true;
+        toSend.to = nick;
       }
 
       // Messages sent in IRC are relayed to the client.
@@ -334,17 +335,18 @@ io.on('connection', function(socket) {
 
     // Handle web chat logic.
     socket.on('webMessage', function(data) {
-      var channel   = data.channel,
-          msg       = data.msg;
+      var target    = data.target,
+          msg       = data.msg,
+          pm        = data.pm;
 
       // Say in IRC.
-      client.say(channel, msg);
+      client.say(target, msg);
 
     });
 
     socket.on('webCommand', function(data){
 
-      var channel = data.channel,
+      var channel = data.target, // Channel or nick
           command = data.command,
           parts   = command.split(' '),
           cmdPart = parts[0],
@@ -379,7 +381,19 @@ io.on('connection', function(socket) {
 
         var reason = cmdArgs.join(' ');
 
-        client.send('PART', channel, reason);
+        if (channel.indexOf('#') === 0) { // Can only part channels
+          client.send('PART', channel, reason);
+        } else { // Handle leaving of PM
+          var user   = clients[socket.id],
+            toSend = {
+              channel : '@' + channel, // PM
+              us      : true,
+            };
+
+          // Let the client know which channel we've left.
+          socket.emit('ircPart', toSend);
+
+        }
 
       };
 
@@ -421,6 +435,27 @@ io.on('connection', function(socket) {
 
       };
 
+      var doMsg = function doMsg() {
+
+        var to  = cmdArgs[0];
+            msg = cmdArgs.slice(1).join(' ');
+
+        client.send('PRIVMSG', to, msg);
+
+        var user = clients[socket.id],
+          toSend =  {
+            to   : to,
+            nick : user.nick,
+            text : msg,
+            when : moment(),
+            us   : true,
+          };
+
+        // Messages sent in IRC are relayed to the client.
+        socket.emit('ircMessage', toSend);
+
+      };
+
       var cmdMapping = {
         '/join' : doJoin,
         '/j'    : doJoin,
@@ -432,6 +467,8 @@ io.on('connection', function(socket) {
         '/q'    : doQuit,
         '/nick' : doNick,
         '/n'    : doNick,
+        '/msg'  : doMsg,
+        '/m'    : doMsg,
       };
 
       var sendError = function(channel, msg) {

@@ -383,17 +383,18 @@ jQuery(document).ready(function($) {
 
   function joinChannel(channel) {
     var channelList      = $('#channel-list'),
+        isPm             = channel.startsWith('@'),
         root             = channel === 'main',
         linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
                            '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
                            '</li>',
         channelCont      = $('#channel-containers'),
         channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">' +
-                           (root ? '' : '<div class="topic">Topic: <span></span></div>') +
-                           (root ? '<div class="columns messages">' : '<div class="small-9 columns messages">') +
+                           (root || isPm  ? '' : '<div class="topic">Topic: <span></span></div>') +
+                           (root || isPm  ? '<div class="columns messages">' : '<div class="small-9 columns messages">') +
                            '<ul class="no-bullet"></ul>' +
                            '</div>' +
-                           (root ? '' : '<div class="small-3 columns names"><ul class="no-bullet"></ul></div>') +
+                           (root || isPm ? '' : '<div class="small-3 columns names"><ul class="no-bullet"></ul></div>') +
                            '</div>';
 
       // Check for existing loaded UI, and continue from there.
@@ -457,31 +458,32 @@ jQuery(document).ready(function($) {
   $('form.send').submit(function(e) {
     if (e) { e.preventDefault(); }
 
-    var el  = $('input[name=message]');
-    var val = el.val();
+    var el  = $('input[name=message]'),
+        val = el.val();
 
     // Get the channel from the URL
-    var channel   = history.state.channel || 'main';
-    var msg       = val;
-    var isCommand = msg.indexOf('/') === 0;
+    var channel   = history.state.channel || 'main',
+        pm        = channel.indexOf('@') === 0,
+        msg       = val,
+        isCommand = msg.indexOf('/') === 0;
 
     var msgObj = {
       nick    : socketNick,
       when    : moment(),
       channel : channel,
-    }        ;
+    };
 
     if (isCommand) {
-      console.log('sending command ...', msg);
+      console.log('sending command ...', msg, channel);
       socket.emit('webCommand', {
-          channel: channel,
-          command: msg,
+        target: (pm ? channel.slice(1) : channel),
+        command: msg,
       });
     } else if (msg) {
       console.log('sending message ...', msg);
       socket.emit('webMessage', {
-        channel : channel,
-        msg     : msg
+        target  : (pm ? channel.slice(1) : channel), // Either channel or nick
+        msg     : msg,
       });
 
       msgObj.type = 'user';
@@ -610,6 +612,12 @@ jQuery(document).ready(function($) {
         us      = data.us;
 
     console.log('*** ircMessage', data);
+
+
+    if (us) {
+      channel = '@' + channel;
+      joinChannel(channel);
+    }
 
     var msgObj  = {
       msg       : msg,
