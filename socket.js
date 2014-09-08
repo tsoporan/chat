@@ -199,14 +199,21 @@ io.on('connection', function(socket) {
 
     client.on('message', function(nick, to, text, message) {
 
+      var user   = clients[socket.id],
+          toSend =  {
+            nick : nick,
+            to   : to,
+            text : text,
+            when : moment(),
+          };
+
+      if (user.nick === to) {
+        // Sending a PM to us.
+        toSend.us = true;
+      }
+
       // Messages sent in IRC are relayed to the client.
-      socket.emit('ircMessage', {
-        nick   : nick,
-        to     : to,
-        text   : text,
-        message: message,
-        when   : moment()
-      });
+      socket.emit('ircMessage', toSend);
 
     });
 

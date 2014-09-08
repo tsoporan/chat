@@ -200,10 +200,10 @@ div.channel[data-channel='#root'] .messages {
 }
 span.timestamp {
   padding-right: 5px;
+  border-right: 1px solid #e3e3e3;
 }
 span.nick {
   padding-left: 5px;
-  border-left: 1px solid #e3e3e3;
   font-weight: bold;
 }
 span.text {

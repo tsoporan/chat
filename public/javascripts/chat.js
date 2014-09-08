@@ -319,12 +319,12 @@ jQuery(document).ready(function($) {
           for (var i = 0; i < msg.length; i++) {
             m = escapeHTML(msg[i]);
             if (m) {
-              html += '<li class="message system_msg"><span class="timestamp">' + when + '</span>' + m + '</li>';
+              html += '<li class="message system_msg"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
             }
           }
         } else {
           m = escapeHTML(msg);
-          html = '<li class="message system_msg"><span class="timestamp">' + when + '</span>' + m + '</li>';
+          html = '<li class="message system_msg"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
         }
         appendHTML(containers, html);
 
@@ -355,7 +355,7 @@ jQuery(document).ready(function($) {
 
       case 'error':
           m = escapeHTML(msg);
-          html = '<li class="message error"><span class="timestamp">' + when + '</span>' + m + '</li>';
+          html = '<li class="message error"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
 
           appendHTML(containers, html);
 
@@ -379,6 +379,61 @@ jQuery(document).ready(function($) {
     socket.emit('connectToIRC', opts);
     closeAlert('disconnected');
     createAlert({ msg: 'Connecting to '+ opts.server + ' ...', level: 'warning', label: 'connecting'});
+  }
+
+  function joinChannel(channel) {
+    var channelList      = $('#channel-list'),
+        root             = channel === 'main',
+        linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
+                           '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
+                           '</li>',
+        channelCont      = $('#channel-containers'),
+        channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">' +
+                           (root ? '' : '<div class="topic">Topic: <span></span></div>') +
+                           (root ? '<div class="columns messages">' : '<div class="small-9 columns messages">') +
+                           '<ul class="no-bullet"></ul>' +
+                           '</div>' +
+                           (root ? '' : '<div class="small-3 columns names"><ul class="no-bullet"></ul></div>') +
+                           '</div>';
+
+      // Check for existing loaded UI, and continue from there.
+      var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
+      if (!existingChannelLink.length) {
+        channelList.append(linkHTML);
+
+        // Add click behaviour for channel list.
+        $('#channel-list li[data-channel="'+channel+'"] a').on('click', function(e) {
+          var channel = $(this).attr('href');
+
+          if (root) {
+            history.pushState({ root: true, }, '', '/');
+          } else {
+            history.pushState({ channel: channel }, '', '/channel/' + channel + '/');
+          }
+
+          $(window).trigger('pathchange');
+
+          return false;
+        });
+
+      }
+
+      var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
+      if (!existingChannel) {
+        channelCont.append(channelHTML);
+        setContainerHeight(channel);
+      }
+      if (history.state && history.state.channel === channel) {
+        existingChannelLink.removeClass('selected').addClass('selected');
+      } else {
+        if (root) {
+          history.pushState({ root: true }, '', '/');
+        } else {
+          history.pushState({ channel: channel }, '', '/channel/' + channel + '/');
+        }
+        $(window).trigger('pathchange');
+      }
+
   }
 
   // Connecting to IRC from web.
@@ -414,7 +469,7 @@ jQuery(document).ready(function($) {
       nick    : socketNick,
       when    : moment(),
       channel : channel,
-    };
+    }        ;
 
     if (isCommand) {
       console.log('sending command ...', msg);
@@ -519,40 +574,7 @@ jQuery(document).ready(function($) {
     });
 
     // Add the main channel.
-    var channel     = 'main',
-        channelCont = $('#channel-containers'),
-        channelHTML = '<div class="channel" data-channel="' + channel + '">' +
-                        '<div class="messages">' +
-                          '<ul class="no-bullet"></ul>' +
-                        '</div>' +
-                      '</div>',
-        channelList = $('#channel-list'),
-        linkHTML    = '<li data-channel="'+ channel +'" class="channel">' +
-                      '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
-                      '</li>';
-
-    // Check for existing loaded UI, and continue from there.
-    var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]').length;
-    if (!existingChannelLink) {
-      channelList.append(linkHTML);
-
-      $('#channel-list li[data-channel="'+channel+'"] a').on('click', function(e) {
-        var channel = $(this).attr('href');
-
-        history.pushState({ root: true }, '', '/');
-
-        $(window).trigger('pathchange');
-
-        return false;
-      });
-
-    }
-
-    var existingChannel =  channelCont.find('div[data-channel="' + channel + '"]').length;
-    if (!existingChannel) {
-      channelCont.append(channelHTML);
-      setContainerHeight(channel);
-    }
+    joinChannel('main');
 
     history.pushState({ root: true }, '', '/');
     $(window).trigger('pathchange');
@@ -584,7 +606,8 @@ jQuery(document).ready(function($) {
     var channel = data.to,
         msg     = data.text,
         nick    = data.nick,
-        when    = data.when;
+        when    = data.when,
+        us      = data.us;
 
     console.log('*** ircMessage', data);
 
@@ -711,52 +734,7 @@ jQuery(document).ready(function($) {
     if (us) {
 
       // If we're joining check/create UI.
-
-      var channelList      = $('#channel-list'),
-          linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
-                             '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
-                             '</li>',
-          channelCont      = $('#channel-containers'),
-          channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">'+
-                             '<div class="topic">Topic: <span></span></div>' +
-                             '<div class="small-9 columns messages">' +
-                             '<ul class="no-bullet"></ul>' +
-                             '</div>' +
-                             '<div class="small-3 columns names">' +
-                             '<ul class="no-bullet"></ul>' +
-                             '</div>' +
-                             '</div>';
-
-      // Check for existing loaded UI, and continue from there.
-      var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
-      if (!existingChannelLink.length) {
-        channelList.append(linkHTML);
-
-        // Add click behaviour for channel list.
-        $('#channel-list li[data-channel="'+channel+'"] a').on('click', function(e) {
-          var channel = $(this).attr('href');
-
-          history.pushState({ channel: channel }, '', '/channel/' + channel + '/');
-
-          $(window).trigger('pathchange');
-
-          return false;
-        });
-
-      }
-
-      var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
-      if (!existingChannel) {
-        channelCont.append(channelHTML);
-        setContainerHeight(channel);
-      }
-      if (history.state.channel === channel) {
-        existingChannelLink.removeClass('selected').addClass('selected');
-      } else {
-        history.pushState({ channel: channel }, '', '/channel/' + channel + '/');
-        $(window).trigger('pathchange');
-      }
-
+      joinChannel(channel);
 
     } else {
 
