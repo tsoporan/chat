@@ -479,6 +479,14 @@ jQuery(document).ready(function($) {
         target: (pm ? channel.slice(1) : channel),
         command: msg,
       });
+
+      // Post user commands to the main window.
+      msgObj.type    = 'system';
+      msgObj.msg     = msg;
+      msgObj.channel = 'main';
+
+      postToChannel(msgObj);
+
     } else if (msg) {
       console.log('sending message ...', msg);
       socket.emit('webMessage', {
