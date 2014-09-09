@@ -57,8 +57,6 @@ io.on('connection', function(socket) {
       }
       nickPool.push(nick);
 
-      console.log('nickPool', nickPool);
-
       // Account for no channels passed, in this case we just join the network.
       if (channels) {
         channels = channels.split(',');
@@ -106,6 +104,8 @@ io.on('connection', function(socket) {
           channel = err.args[1],
           msg     = err.args[2],
           all     = err.args;
+
+      console.log('on error', nick, channel, msg);
 
       socket.emit('ircError', {
         msg     : msg,
@@ -199,6 +199,8 @@ io.on('connection', function(socket) {
 
     client.on('message', function(nick, to, text, message) {
 
+      console.log('on message', nick, to, text);
+
       var user   = clients[socket.id],
           toSend =  {
             nick : nick,
@@ -245,7 +247,7 @@ io.on('connection', function(socket) {
       // Send the message of the day.
       socket.emit('ircMOTD', {
         when : moment(),
-        motd : motd.split('\n'),
+        motd : motd,
       });
     });
 
@@ -371,8 +373,12 @@ io.on('connection', function(socket) {
           msg       = data.msg,
           pm        = data.pm;
 
+      console.log('on webmessage', data);
+
       // Say in IRC.
-      client.say(target, msg);
+      if ( target !== 'main' ) { // The main window will not exist as a channel.
+        client.say(target, msg);
+      }
 
     });
 
@@ -468,15 +474,18 @@ io.on('connection', function(socket) {
       };
 
       var doMsg = function doMsg(opts) {
-        opts   = opts || {};
-        to     = opts.to || cmdArgs[0];
-        msg    = opts.msg || cmdArgs.slice(1).join(' ');
-        action = opts.action;
-        type   = opts.type;
+        opts       = opts || {};
 
-        console.log('doMsg', to, msg, action, type);
+        var to     = opts.to || cmdArgs[0],
+            msg    = opts.msg || cmdArgs.slice(1).join(' '),
+            us     = opts.hasOwnProperty('us') ? opts.us :  true,
+            safe   = opts.safe,
+            action = opts.action,
+            type   = opts.type;
 
-        client.send('PRIVMSG', to, msg);
+        if (to !== 'main') {
+          client.send('PRIVMSG', to, msg);
+        }
 
         var user = clients[socket.id],
           toSend =  {
@@ -485,7 +494,8 @@ io.on('connection', function(socket) {
             text : action || msg,
             when : moment(),
             type : type,
-            us   : true,
+            safe : safe,
+            us   : us,
           };
 
         // Messages sent in IRC are relayed to the client.
@@ -506,20 +516,38 @@ io.on('connection', function(socket) {
 
       };
 
+      var doHelp = function doHelp() {
+          var msg  = 'These are the available commands:\n';
+
+          for (var key in cmdMapping) {
+            msg += '- ' + key + ' : ' + cmdMapping[key].helpText + '\n';
+          }
+
+          doMsg({
+            msg : msg,
+            to  : 'main',
+            type: 'system',
+            us  : false,
+            safe: true,
+          });
+
+      };
+
       var cmdMapping = {
-        '/join' : doJoin,
-        '/j'    : doJoin,
-        '/part' : doPart,
-        '/p'    : doPart,
-        '/topic': doTopic,
-        '/t'    : doTopic,
-        '/quit' : doQuit,
-        '/q'    : doQuit,
-        '/nick' : doNick,
-        '/n'    : doNick,
-        '/msg'  : doMsg,
-        '/m'    : doMsg,
-        '/me'   : doAction,
+        '/join' : { func: doJoin,   helpText: 'Join a channel, takes a channel argument. ex: /join #somechannel'},
+        '/j'    : { func: doJoin,   helpText: 'Short hand for /join'},
+        '/part' : { func: doPart,   helpText: 'Parts the current channel, takes an optional reason argument. ex: /part no more love to give'},
+        '/p'    : { func: doPart,   helpText: 'Short hand for /part'},
+        '/topic': { func: doTopic,  helpText: 'Changes the channel topic, takes an argument. ex: /topic i like unicorns'},
+        '/t'    : { func: doTopic,  helpText: 'Short hand for /topic'},
+        '/quit' : { func: doQuit,   helpText: 'Quits. Everything. Takes an optional reason argument. ex: /quit self destruct'},
+        '/q'    : { func: doQuit,   helpText: 'Short hand for /quit'},
+        '/nick' : { func: doNick,   helpText: 'Changes your nick, takes one argument. ex: /nick ZeroCool'},
+        '/n'    : { func: doNick,   helpText: 'Short hand for /nick'},
+        '/msg'  : { func: doMsg,    helpText: 'Sends a private message to channel or person, takes two arguments target and message. ex: /msg ZeroCool seriously? change your name!'},
+        '/m'    : { func: doMsg,    helpText: 'Short hand for /msg'},
+        '/me'   : { func: doAction, helpText: 'Do an action! Takes an argument. ex: /me slaps ZeroCool'},
+        '/help' : { func: doHelp,   helpText: 'Fire - exclamation mark. Fire - exclamation mark. Help me - exclamation mark.'},
       };
 
       var sendError = function(channel, msg) {
@@ -531,7 +559,7 @@ io.on('connection', function(socket) {
       };
 
       if (cmdPart in cmdMapping) {
-        return cmdMapping[cmdPart]();
+        return cmdMapping[cmdPart].func();
       } else {
         return sendError(channel, 'Command "' + cmdPart + '" is not recognized.');
       }

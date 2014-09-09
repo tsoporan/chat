@@ -301,11 +301,11 @@ jQuery(document).ready(function($) {
 
     var channel    = msgObj.channel,
         nick       = msgObj.nick,
-        msg        = msgObj.msg,
+        msg        = msgObj.msg.split('\n'),
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
+        safe       = msgObj.safe,
         color      = 'none',
-        msgArray   = Array.isArray(msg),
         html       = '',
         hilited,
         chanMsgs,
@@ -348,17 +348,11 @@ jQuery(document).ready(function($) {
     switch (type) {
       case 'system':
 
-        if (msgArray) {
-          for (var i = 0; i < msg.length; i++) {
-            m = escapeHTML(msg[i]);
-            if (m) {
-              html += '<li class="message system_msg"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
-            }
-          }
-        } else {
-          m    = escapeHTML(msg);
-          html = '<li class="message system_msg"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
-        }
+        msg.forEach(function(m) {
+            m = safe ? m : escapeHTML(m);
+            html += '<li class="message system_msg"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
+        });
+
         appendHTML(containers, html);
 
         break;
@@ -367,27 +361,22 @@ jQuery(document).ready(function($) {
 
         hilited = (msg.indexOf(socketNick) !== -1 && nick !== socketNick) ? 'hilited' : '';
 
-        if (msgArray) {
-          for (var j = 0; j < msg.length; j++) {
-            m = processMsg(escapeHTML(msg[j]));
-            if (m) {
-              html += '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
-                     '<span class="timestamp">' + when + '</span>' +
-                     '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
-            }
+        msg.forEach(function(m) {
+          m = processMsg( safe ? m : escapeHTML(m) );
+          if (m) {
+            html += '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
+                    '<span class="timestamp">' + when + '</span>' +
+                    '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
           }
-        } else {
-          m    = processMsg(escapeHTML(msg));
-          html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
-                 '<span class="timestamp">' + when + '</span>' +
-                 '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
-        }
+        });
+
         appendHTML(containers, html);
 
         break;
 
       case 'action':
-        m    = processMsg(escapeHTML(msg));
+
+        m    = processMsg( safe ? msg : escapeHTML(msg) );
         html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
                '<span class="timestamp">' + when + '</span>' +
                '<span class="action color_' + color + '"> * ' + nick + ' ' + m + '</span></li>';
@@ -397,7 +386,8 @@ jQuery(document).ready(function($) {
         break;
 
       case 'error':
-          m    = escapeHTML(msg);
+
+          m    = safe ? msg : escapeHTML(msg);
           html = '<li class="message error"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
 
           appendHTML(containers, html);
@@ -499,6 +489,7 @@ jQuery(document).ready(function($) {
 
   // Sending message from web.
   $('form.send').submit(function(e) {
+
     if (e) { e.preventDefault(); }
 
     var el  = $('input[name=message]'),
@@ -661,12 +652,13 @@ jQuery(document).ready(function($) {
         nick    = data.nick,
         when    = data.when,
         type    = data.type,
+        safe    = data.safe,
         us      = data.us;
 
     console.log('*** ircMessage', data);
 
-
     if (us) {
+      console.log('us', us);
       channel = channel.indexOf('#') === 0 ? channel : '@'+channel;
       joinChannel(channel);
     }
