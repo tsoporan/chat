@@ -356,7 +356,7 @@ jQuery(document).ready(function($) {
             }
           }
         } else {
-          m = escapeHTML(msg);
+          m    = escapeHTML(msg);
           html = '<li class="message system_msg"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
         }
         appendHTML(containers, html);
@@ -377,7 +377,7 @@ jQuery(document).ready(function($) {
             }
           }
         } else {
-          m = processMsg(escapeHTML(msg));
+          m    = processMsg(escapeHTML(msg));
           html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
                  '<span class="timestamp">' + when + '</span>' +
                  '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
@@ -386,8 +386,18 @@ jQuery(document).ready(function($) {
 
         break;
 
+      case 'action':
+        m    = processMsg(escapeHTML(msg));
+        html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
+               '<span class="timestamp">' + when + '</span>' +
+               '<span class="action color_' + color + '"> * ' + nick + ' ' + m + '</span></li>';
+
+        appendHTML(containers, html);
+
+        break;
+
       case 'error':
-          m = escapeHTML(msg);
+          m    = escapeHTML(msg);
           html = '<li class="message error"><span class="timestamp">' + when + '</span><span class="text">' + m + '</span></li>';
 
           appendHTML(containers, html);
@@ -650,13 +660,14 @@ jQuery(document).ready(function($) {
         msg     = data.text,
         nick    = data.nick,
         when    = data.when,
+        type    = data.type,
         us      = data.us;
 
     console.log('*** ircMessage', data);
 
 
     if (us) {
-      channel = '@' + channel;
+      channel = channel.indexOf('#') === 0 ? channel : '@'+channel;
       joinChannel(channel);
     }
 
@@ -665,7 +676,7 @@ jQuery(document).ready(function($) {
       nick      : nick,
       when      : when,
       channel   : channel,
-      type      : 'user',
+      type      : type || 'user',
     };
 
     var cached = nick in nickCache;

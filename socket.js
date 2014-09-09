@@ -297,7 +297,39 @@ io.on('connection', function(socket) {
     });
 
     client.on('raw', function(message) {
-      //console.log('*** RAW MESSAGE: ', message);
+      // console.log('*** RAW MESSAGE: ', message);
+
+      // Handle PRIVMSG actions since 'message' doesn't catch them.
+      var rawCommand = message.rawCommand,
+          nick       = message.nick,
+          target,
+          msg,
+          text,
+          toSend;
+
+      if (rawCommand === 'PRIVMSG') {
+        target = message.args[0];
+        msg    = message.args[1];
+
+        if (target && msg) {
+          if (msg.indexOf('\u0001ACTION') === 0) {
+            // This is an action.
+            text = msg.split('\u0001')[1].split('ACTION')[1].trim(); // Get just the text portion.
+
+            toSend = {
+              nick : nick,
+              to   : target.indexOf('#') === 0 ? target : '@' + nick,
+              text : text,
+              when : moment(),
+              type : 'action'
+            };
+
+            socket.emit('ircMessage', toSend);
+          }
+        }
+
+      }
+
     });
 
     client.connect(function(welcome) {
@@ -435,10 +467,14 @@ io.on('connection', function(socket) {
 
       };
 
-      var doMsg = function doMsg() {
+      var doMsg = function doMsg(opts) {
+        opts   = opts || {};
+        to     = opts.to || cmdArgs[0];
+        msg    = opts.msg || cmdArgs.slice(1).join(' ');
+        action = opts.action;
+        type   = opts.type;
 
-        var to  = cmdArgs[0];
-            msg = cmdArgs.slice(1).join(' ');
+        console.log('doMsg', to, msg, action, type);
 
         client.send('PRIVMSG', to, msg);
 
@@ -446,13 +482,27 @@ io.on('connection', function(socket) {
           toSend =  {
             to   : to,
             nick : user.nick,
-            text : msg,
+            text : action || msg,
             when : moment(),
+            type : type,
             us   : true,
           };
 
         // Messages sent in IRC are relayed to the client.
         socket.emit('ircMessage', toSend);
+
+      };
+
+      var doAction = function doAction() {
+        var action = cmdArgs.join(' '),
+            msg = '\u0001ACTION ' + action + '\u0001';
+
+        doMsg({
+          action : action,
+          msg    : msg,
+          type   : 'action',
+          to     : channel
+        });
 
       };
 
@@ -469,6 +519,7 @@ io.on('connection', function(socket) {
         '/n'    : doNick,
         '/msg'  : doMsg,
         '/m'    : doMsg,
+        '/me'   : doAction,
       };
 
       var sendError = function(channel, msg) {
