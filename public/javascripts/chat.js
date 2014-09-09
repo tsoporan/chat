@@ -124,11 +124,10 @@ jQuery(document).ready(function($) {
     '>' : '&gt;',
     '"' : '&quot;',
     '\'': '&#39;',
-    '/' : '&#x2F;'
   };
 
   function escapeHTML(string) {
-    return String(string).replace(/[&<>"'\/]/g, function (s) {
+    return String(string).replace(/[&<>"']/g, function (s) {
       return entityMap[s];
     });
   }
@@ -262,6 +261,40 @@ jQuery(document).ready(function($) {
     return false;
   }
 
+  function processMsg(msg) {
+    // Further processing on msg.
+
+    // Linkify URLS.
+    var urlRegex = new RegExp(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g),
+        matches = msg.match(urlRegex),
+        matchSplit,
+        idx,
+        html,
+        newMsg = [],
+        c = 0,
+        link;
+
+    if (matches) {
+
+      matchSplit = msg.split(urlRegex);
+
+      matchSplit.forEach(function(s) {
+        if (s === undefined) {
+          link = matches[c];
+          html = '<a href="'+link+'" target="_blank">'+link+'</a>';
+          newMsg.push(html);
+          c++;
+        } else {
+          newMsg.push(s);
+        }
+      });
+
+      msg = newMsg.join(' ');
+    }
+
+    return msg;
+  }
+
   function postToChannel(msgObj) {
 
     console.log('post to channel', msgObj);
@@ -336,7 +369,7 @@ jQuery(document).ready(function($) {
 
         if (msgArray) {
           for (var j = 0; j < msg.length; j++) {
-            m = escapeHTML(msg[j]);
+            m = processMsg(escapeHTML(msg[j]));
             if (m) {
               html += '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
                      '<span class="timestamp">' + when + '</span>' +
@@ -344,7 +377,7 @@ jQuery(document).ready(function($) {
             }
           }
         } else {
-          m = escapeHTML(msg);
+          m = processMsg(escapeHTML(msg));
           html = '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
                  '<span class="timestamp">' + when + '</span>' +
                  '<span class="nick color_'+ color + '">' + nick + '</span>: <span class="text">' + m + '</span></li>';
