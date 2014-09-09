@@ -45,7 +45,8 @@ io.on('connection', function(socket) {
         socket.emit('systemMessage', {
           type : 'error',
           msg  : 'This client is already connected!',
-          when : moment()
+          when : moment(),
+          label: 'alreadyconnected',
         });
         return false;
       }
@@ -91,9 +92,10 @@ io.on('connection', function(socket) {
 
       if (!connected) {
         socket.emit('systemMessage', {
-          type: 'alert',
-          msg : 'Could not connect! Check the information and try again.',
-          when: moment(),
+          type  : 'alert',
+          msg   : 'Could not connect! Check the information and try again.',
+          when  : moment(),
+          label : 'couldnotconnect',
         });
       }
     }, 15000);

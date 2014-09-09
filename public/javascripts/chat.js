@@ -954,6 +954,7 @@ jQuery(document).ready(function($) {
   socket.on('systemMessage', function(data) {
     var msg  = data.msg,
         type = data.type,
+        label= data.label,
         when = data.when;
 
     console.log('*** sysMessage: ', data);
@@ -962,7 +963,7 @@ jQuery(document).ready(function($) {
     createAlert({
       msg   : msg,
       level : type,
-      label : 'couldnotconnect',
+      label : label,
     });
 
   });
