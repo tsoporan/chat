@@ -134,7 +134,7 @@ jQuery(document).ready(function($) {
 
   function getColor() {
 
-      // Black reserved for current user.
+      // White reserved for current user.
       var colors  = [
         'blue',
         'green',
@@ -419,7 +419,7 @@ jQuery(document).ready(function($) {
         isPm             = channel.startsWith('@'),
         root             = channel === 'main',
         linkHTML         = '<li data-channel="'+ channel +'" class="channel">' +
-                           '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +
+                           '<a href="' + channel  +'" class="channelLink button tiny radius">' + channel + '</a>' +  (root ? '' : '<span class="part">&times;</span>') +
                            '</li>',
         channelCont      = $('#channel-containers'),
         channelHTML      = '<div class="channel hidden row" data-channel="' + channel + '">' +
@@ -434,6 +434,14 @@ jQuery(document).ready(function($) {
       var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
       if (!existingChannelLink.length) {
         channelList.append(linkHTML);
+
+        // Add click behaviour for parting.
+        $('#channel-list li[data-channel="'+channel+'"] .part').on('click', function() {
+          socket.emit('webCommand', {
+            target: channel.startsWith('@') ? channel.slice(1) : channel,
+            command: '/part',
+          });
+        });
 
         // Add click behaviour for channel list.
         $('#channel-list li[data-channel="'+channel+'"] a').on('click', function(e) {

@@ -1,16 +1,49 @@
 // #chat style.less
 
-// Fonts
-@monospace : 'Inconsolata';
-
 // Colors
 @orange : #FF7200;
 @lgrey  : #E3E3E3;
 @dgrey  : #3A3A3A;
+@dgrey1 : #111111;
+@dgrey2 : #121212;
+@dgrey3 : #2b2b2b;
+@dgrey4 : #252525;
+@dgrey5 : #6e6e6e;
 @white  : #FAFAFA;
 @black  : #000000;
 @dgreen : #00AA1B;
 @lgreen : #00E224;
+@logo_green_grad1 : #00EC26;
+@logo_green_grad2 : #00AC1C;
+@sep_border : #363636;
+@after_sep : #252525;
+
+@input_bg : #202020;
+@input_color : #6e6e6e;
+@input_box_shadow: rgba(255, 255, 255, 0.1) 0 1px 0, rgba(0, 0, 0, 0.8) 0 1px 7px 0px inset;
+@input_focus_bg: $#1a1a1a;
+
+@background_color: #2f2f2f;
+@background_grad1: #313131;
+@background_grad2: #131313;
+@text_color : #c6c6c6;
+@text_shadow : 0px 1px 0px #1d1d1d;
+@message_text_shadow : 1px 2px 0 #121212;
+
+@border_bottom : #121212;
+@border_top : #333333;
+
+@timestamp : #616161;
+@timestamp_border: #616161;
+
+@cl_link_bg : #131313;
+@cl_link_span_bg : #090909;
+@cl_link_selected_bg: #636363;
+
+@topic_bg : #222222;
+
+@message_border : 1px solid #0c0c0c;
+@names_border : 1px solid #424242;
 
 @error : rgb(248, 58, 58);
 
@@ -31,7 +64,7 @@
 @irc_light_grey : #C9C9C9;
 @hilited : #D5FFC2;
 
-.color_none, .color_black { color: @black; }
+.color_none { color: @white; }
 .color_blue { color: @irc_blue; }
 .color_green { color: @irc_green; }
 .color_red { color: @irc_red; }
@@ -50,20 +83,37 @@
 // Global styles
 html, body {
   height: 100%;
-  background: @white;
-  font-family: @monospace;
+  background-image: linear-gradient(@background_grad1, @background_grad2);
+  background-color: @background_color;
+  color : @text_color;
 }
 
 h1,h2,h3,h4,h5,h6 {
-  font-family: @monospace;
+  color: @text_color;
+  text-shadow: @text_shadow;
 }
 
 a {
-  font-family: @monospace;
+  text-shadow: @text_shadow;
+}
+
+input[type=text] {
+  color: @input_color;
+  background:  @input_bg;
+  box-shadow: @input_box_shadow;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+}
+input[type=text]:focus {
+  background: @input_focus_bg;
+  box-shadow: @input_box_shadow;
+  outline: none;
 }
 
 body {
-  color: @dgrey;
+  color: @text_color;
+  text-shadow: @text_shadow;
 }
 
 .bold {
@@ -83,7 +133,6 @@ body {
 }
 
 .top-bar-section ul li>a {
-  font-family: @monospace;
 }
 
 .top-bar-section ul li > a.hidden {
@@ -107,7 +156,6 @@ body {
 }
 
 .button {
-  font-family: @monospace;
   background: @dgreen;
 }
 
@@ -150,34 +198,42 @@ div.wrap > div {
 // Header styles
 
 .top-bar {
-  height: 50px;
-  border-bottom: 3px solid @dgreen;
+  height: 48px;
+  border-bottom: 3px solid @dgrey3;
 }
 
 #logo {
   margin: 0;
   padding: 0;
   font-size: 3em;
-  font-family: 'Inconsolata';
   font-weight: bold;
   color: @lgreen;
+  background: -webkit-linear-gradient(@logo_green_grad1, @logo_green_grad2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
 }
+
 
 form.connect {
   margin: 20px;
 }
 
+#connectModal {
+  background-color: @dgrey4;
+  border: 1px solid @dgrey1;
+}
+
 // Intro styles
 h2.intro {
   font-size: 4em;
-  color: @dgrey;
+  margin: 80px 0;
 }
 
 hr.intro-sep {
     padding: 0;
     border: none;
-    border-top: medium double @lgrey;
-    color : @lgrey;
+    border-top: medium double @sep_border;
     text-align: center;
     margin: 60px 0;
 }
@@ -189,7 +245,7 @@ hr.intro-sep:after {
     top: -0.2em;
     font-size: 4em;
     padding: 0 0.25em;
-    background: @white;
+    background: @after_sep;
 }
 
 #channel-containers ul.popular-networks {
@@ -211,13 +267,26 @@ hr.intro-sep:after {
   margin: 0 5px;
 }
 
-#channels li a {
-  background: @lgrey;
-  color: @dgrey;
+#channel-list  li a {
+  background: @cl_link_bg;
+  color: @white;
+  display: inline-block;
+  border-radius: 3px 0 0 3px;
+}
+#channel-list li:first-child a {
+  border-radius: 3px;
+}
+#channel-list li span.part {
+  display: inline-block;
+  vertical-align: top;
+  padding: 4px 5px;
+  border-radius: 0 3px 3px 0;
+  background: @cl_link_span_bg;
+  cursor: pointer;
 }
 
 #channels li a.channelLink.selected {
-  background: @dgrey;
+  background: @cl_link_selected_bg;
   color: @white;
 }
 
@@ -229,9 +298,12 @@ div.channel {
 
 // Message styles
 div.channel .messages {
-    border-right: 1px solid @lgrey;
+    border-right: @message_border;
     overflow: auto;
     height: 100%;
+}
+div.channel[data-channel="main"] .messages {
+  border-right: none;
 }
 
 div.channel[data-channel='#root'] .messages {
@@ -239,26 +311,37 @@ div.channel[data-channel='#root'] .messages {
 }
 
 #channel-containers .message {
-  border-bottom: 1px solid @lgrey;
-  padding: 5px;
+  border-bottom: 1px solid @border_bottom;
+  border-top: 1px solid @border_top;
+  padding: 7px;
+  font-size: .9em;
+}
+#channel-containers .message:first-child {
+  border-top: none;
+}
+#channel-containers .message:last-child {
+  border-bottom: none;
 }
 
 span.timestamp {
   padding-right: 5px;
-  border-right: 1px solid @lgrey;
+  border-right: 1px solid @timestamp_border;
+  color: @timestamp;
+  text-shadow: @message_text_shadow;
 }
 
 span.nick {
   padding-left: 5px;
   font-weight: bold;
+  text-shadow: @message_text_shadow;
 }
 
 span.text {
   padding-left: 5px;
+  text-shadow: @message_text_shadow;
 }
 
 .message.system_msg {
-  font-style: italic;
 }
 
 .message.hilited {
@@ -267,7 +350,6 @@ span.text {
 
 .message.error {
   color: @error;
-  font-style: italic;
 }
 
 .message.error .timestamp {
@@ -277,7 +359,10 @@ span.text {
 // Names sidebar styles
 div.names {
   overflow: auto;
-  height: 100%;
+  border-left: @names_border;
+}
+div.names ul {
+  font-size: .9em;
 }
 
 li.nick {
@@ -292,13 +377,16 @@ div.topic {
   padding: 5px;
   margin-bottom: 10px;
   min-height: 10px;
-  background: @lgrey;
+  background: @topic_bg;
   font-weight: bold;
+  border-radius: 3px;
 }
 
 // Send form styles
 input[name=send] {
   padding: 10px;
+  margin: 0 3px;
+  border-radius: 4px;
 }
 
 // Footer styles
