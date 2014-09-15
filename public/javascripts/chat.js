@@ -276,34 +276,21 @@ jQuery(document).ready(function($) {
     // Further processing on msg.
 
     // Linkify URLS.
-    var urlRegex = new RegExp(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g),
-        matches = msg.match(urlRegex),
-        matchSplit,
-        idx,
-        html,
-        newMsg = [],
-        c = 0,
-        link;
+    var urlRegex = new RegExp(/(https?[^ ]+)/),
+        split = msg.split(urlRegex),
+        newMsg = '';
 
-    if (matches) {
+    if (split.length) {
 
-      matchSplit = msg.split(urlRegex);
+      newMsg = split[0];
 
-      matchSplit.forEach(function(s) {
-        if (s === undefined) {
-          link = matches[c];
-          html = '<a href="'+link+'" target="_blank">'+link+'</a>';
-          newMsg.push(html);
-          c++;
-        } else {
-          newMsg.push(s);
-        }
-      });
-
-      msg = newMsg.join(' ');
+      // Combine the link and msg parts. Links will be odd.
+      for (var i = 1; i < split.length; i += 2) {
+        newMsg += '<a href="'+ split[i] +'" target="_blank">'+ split[i] +'</a>' + split[i+1];
+      }
     }
 
-    return msg;
+    return newMsg || msg;
   }
 
   function postToChannel(msgObj) {
