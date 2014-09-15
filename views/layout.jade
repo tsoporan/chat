@@ -5,14 +5,16 @@ html(class="no-js", lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title= title
 
-    // CSS
-    link(rel="stylesheet", href=stylesheetPath)
+    block assets
 
-    // Javascripts
-    script(src=javascriptPath)
+        // CSS
+        link(rel="stylesheet", href=stylesheetPath)
+
+        // Javascripts
+        script(src=javascriptPath)
 
   body
     block content
 
-    script.
-      $(document).foundation();
+        script.
+            $(document).foundation();
