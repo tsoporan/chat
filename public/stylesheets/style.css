@@ -1,3 +1,4 @@
+@import url(http://fonts.googleapis.com/css?family=Lobster);
 .color_none {
   color: #fafafa;
 }
@@ -140,10 +141,10 @@ div.wrap > div {
   border-bottom: 3px solid #2b2b2b;
 }
 #logo {
+  font-family: 'Lobster', cursive;
   margin: 0;
   padding: 0;
   font-size: 3em;
-  font-weight: bold;
   color: #00e224;
   background: -webkit-linear-gradient(#00ec26, #00ac1c);
   -webkit-background-clip: text;
@@ -160,6 +161,8 @@ form.connect {
 h2.intro {
   font-size: 4em;
   margin: 80px 0;
+  color: #eeeeee;
+  text-shadow: 3px 3px 0 #1d1d1d;
 }
 hr.intro-sep {
   padding: 0;
@@ -217,7 +220,6 @@ div.channel {
   height: 100%;
 }
 div.channel .messages {
-  border-right: 1px solid #0c0c0c;
   overflow: auto;
   height: 100%;
 }
@@ -255,7 +257,10 @@ span.text {
   text-shadow: 1px 2px 0 #121212;
 }
 .message.hilited {
-  background: #d5ffc2;
+  background: #161616;
+}
+.message.hilited .text {
+  color: #ff2a2a;
 }
 .message.error {
   color: #f83a3a;
@@ -265,7 +270,6 @@ span.text {
 }
 div.names {
   overflow: auto;
-  border-left: 1px solid #424242;
 }
 div.names ul {
   font-size: .9em;
@@ -289,6 +293,7 @@ div.topic {
   background: #222222;
   font-weight: bold;
   border-radius: 3px;
+  color: #eeeeee;
 }
 input[name=send] {
   padding: 10px;

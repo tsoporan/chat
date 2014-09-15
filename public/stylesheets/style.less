@@ -1,5 +1,9 @@
 // #chat style.less
 
+// Font imports
+@import url(http://fonts.googleapis.com/css?family=Lobster);
+@lobster_font : 'Lobster', cursive;
+
 // Colors
 @orange : #FF7200;
 @lgrey  : #E3E3E3;
@@ -47,6 +51,11 @@
 
 @error : rgb(248, 58, 58);
 
+@intro_color : #eee;
+@intro_text_shadow : 3px 3px 0 #1d1d1d;
+
+@topic_color : #eee;
+
 // IRC Nick color defs:
 @irc_blue   : #0068B9;
 @irc_green  : #20CA00;
@@ -62,7 +71,8 @@
 @irc_pink : #FF7CCB;
 @irc_grey : #A5A5A5;
 @irc_light_grey : #C9C9C9;
-@hilited : #D5FFC2;
+@hilited : #161616;
+@hilited_text : #FF2A2A;
 
 .color_none { color: @white; }
 .color_blue { color: @irc_blue; }
@@ -203,10 +213,10 @@ div.wrap > div {
 }
 
 #logo {
+  font-family: @lobster_font;
   margin: 0;
   padding: 0;
   font-size: 3em;
-  font-weight: bold;
   color: @lgreen;
   background: -webkit-linear-gradient(@logo_green_grad1, @logo_green_grad2);
   -webkit-background-clip: text;
@@ -228,6 +238,8 @@ form.connect {
 h2.intro {
   font-size: 4em;
   margin: 80px 0;
+  color:  @intro_color;
+  text-shadow: @intro_text_shadow;
 }
 
 hr.intro-sep {
@@ -298,7 +310,6 @@ div.channel {
 
 // Message styles
 div.channel .messages {
-    border-right: @message_border;
     overflow: auto;
     height: 100%;
 }
@@ -347,6 +358,9 @@ span.text {
 .message.hilited {
   background: @hilited;
 }
+.message.hilited .text {
+  color: @hilited_text;
+}
 
 .message.error {
   color: @error;
@@ -359,7 +373,6 @@ span.text {
 // Names sidebar styles
 div.names {
   overflow: auto;
-  border-left: @names_border;
 }
 
 div.names ul {
@@ -390,6 +403,7 @@ div.topic {
   background: @topic_bg;
   font-weight: bold;
   border-radius: 3px;
+  color: @topic_color;
 }
 
 // Send form styles

@@ -43,7 +43,7 @@ jQuery(document).ready(function($) {
     setContainerHeight({ state : history.state });
   });
 
-  // Switch channel on hash change.
+  // Listen for changes to the URL
   $(window).on('pathchange', function() {
 
     var channel;
@@ -369,10 +369,9 @@ jQuery(document).ready(function($) {
 
       case 'user':
 
-        hilited = (msg.indexOf(socketNick) !== -1 && nick !== socketNick) ? 'hilited' : '';
-
         msg.forEach(function(m) {
-          m = processMsg( safe ? m : escapeHTML(m) );
+          m       = processMsg( safe ? m : escapeHTML(m) );
+          hilited = (m.indexOf(socketNick) !== -1 && nick !== socketNick) ? 'hilited' : '';
           if (m) {
             html += '<li class="message '+ type + ' '+ hilited + '" data-to="' + channel +  '">' +
                     '<span class="timestamp">' + when + '</span>' +
