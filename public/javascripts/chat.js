@@ -204,10 +204,16 @@ jQuery(document).ready(function($) {
         nick           = nickObj.nick,
         mode           = '',
         nickHTML       = '',
-        nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul');
+        nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul'),
+        numContainer   = $('div.channel[data-channel="' + channel + '"] div.names ul li.names-count .num'),
+        namesCount     = parseInt(numContainer.text(), 10),
+        newCount       = ++namesCount;
 
     nickHTML = '<li class="nick ltext" data-nick="'+ nick +'"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
     nameContainer.append(nickHTML);
+
+    // Update counts.
+    numContainer.text(newCount);
 
   }
 
@@ -230,12 +236,18 @@ jQuery(document).ready(function($) {
     var channel        = nickObj.channel,
         nick           = nickObj.nick,
         nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul'),
+        numContainer   = $('div.channel[data-channel="' + channel + '"] div.names ul li.names-count .num'),
+        namesCount     = parseInt(numContainer.text(), 10),
+        newCount       = --namesCount,
         exists;
 
     exists = nameContainer.find('.nick[data-nick="'+ nick +'"]');
 
     if (exists.length) {
       exists.remove();
+
+      // Update counts.
+      numContainer.text(newCount);
     }
 
   }
@@ -697,6 +709,9 @@ jQuery(document).ready(function($) {
         nickHTML,
         nick,
         mode;
+
+    // Show name counts first.
+    nameContainer.append('<li class="names-count"><span class="num">'+ users.length +'</span> users</li>');
 
     // Show modded nicks first.
     for (var i in mods) {

@@ -276,6 +276,12 @@ li.nick {
 li.nick .mode {
   color: #00aa1b;
 }
+li.names-count {
+  text-align: right;
+}
+li.names-count .num {
+  font-weight: bold;
+}
 div.topic {
   padding: 5px;
   margin-bottom: 10px;
