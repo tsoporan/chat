@@ -12,24 +12,35 @@ jQuery(document).ready(function($) {
     return this.indexOf(str) === 0;
   };
 
-  function setContainerHeight(channel) {
-    var windowHeight = $(window).height(),
-        headerHeight = $('.top-bar').height(),
-        extraPadding = 80,
-        wrapper      = $('div.wrap'),
-        messages     = $('div.channel[data-channel="'+channel+'"] .messages'),
-        names        = $('div.channel[data-channel="'+channel+'"] .names');
+  function setContainerHeight(opts) {
 
-    wrapper.height(windowHeight - headerHeight - extraPadding);
+    var state   = opts.state,
+        channel = opts.channel;
 
-    // Set message/name height to account for the send form and padding.
-    messages.height(wrapper.height() - 150);
-    names.height(wrapper.height() - 150);
+    // If no channel provided try to get it from the URL.
+    if (!channel) {
+      channel = (state && state.channel) ? state.channel : false;
+    }
+
+    if (channel) {
+      var windowHeight = $(window).height(),
+          headerHeight = $('.top-bar').height(),
+          extraPadding = 80,
+          wrapper      = $('div.wrap'),
+          messages     = $('div.channel[data-channel="'+channel+'"] .messages'),
+          names        = $('div.channel[data-channel="'+channel+'"] .names');
+
+      wrapper.height(windowHeight - headerHeight - extraPadding);
+
+      // Set message/name height to account for the send form and padding.
+      messages.height(wrapper.height() - 150);
+      names.height(wrapper.height() - 150);
+    }
   }
 
   // Take care of screen resizes for chat window.
   $(window).on('resize', function() {
-    setContainerHeight(history.state.channel);
+    setContainerHeight({ state : history.state });
   });
 
   // Switch channel on hash change.
@@ -463,7 +474,7 @@ jQuery(document).ready(function($) {
       var existingChannel = channelCont.find('div[data-channel="' + channel + '"]').length;
       if (!existingChannel) {
         channelCont.append(channelHTML);
-        setContainerHeight(channel);
+        setContainerHeight({ channel: channel});
       }
       if (history.state && history.state.channel === channel) {
         existingChannelLink.removeClass('selected').addClass('selected');
