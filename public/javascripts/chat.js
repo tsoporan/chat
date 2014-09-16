@@ -255,30 +255,26 @@ jQuery(document).ready(function($) {
   function nameComplete(word, channel) {
     // Complete based on the names we have in this channel.
 
-    var namesEls = $('#channel-containers div.channel[data-channel="' + channel + '"] div.names ul li'),
-        names    = [];
+    var namesEls = $('#channel-containers div.channel[data-channel="' + channel + '"] div.names ul li.nick'),
+        names    = {};
 
     word = word[0].toLowerCase();
 
     if (namesEls.length) {
       namesEls.each(function(i, el) {
-        var nameText = $(el).attr('data-nick').toLowerCase();
+        var name     = $(el).attr('data-nick');
+        var lowered  = name.toLowerCase();
 
-        names.push(nameText);
+        names[lowered] = name;
       });
     }
 
-    if (names.length) {
-      for (var i = 0; i < names.length; i++) {
-        var name = names[i];
-
-        // Check if the word matches the  beginning of the nick, as soon
-        // as a match is found return it.
-        if (name.startsWith(word)) {
-          return name;
-        }
+    for (var n in names) {
+      // Check if the word matches the  beginning of the nick, as soon
+      // as a match is found return it.
+      if (n.startsWith(word)) {
+        return names[n];
       }
-
     }
 
     return false;
@@ -586,10 +582,13 @@ jQuery(document).ready(function($) {
         msgObj,
         last;
 
+   
     var codes = {
       9 : function() {
+        if (e) {
+          e.preventDefault();
+        }
 
-        console.log('val', val);
         // A value exists and the last character is not a space, try to autocomplete.
         if (val && val[val.length-1] !== " ") {
 
