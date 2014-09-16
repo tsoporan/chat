@@ -315,6 +315,7 @@ jQuery(document).ready(function($) {
         type       = msgObj.type,
         when       = (msgObj.when ? moment(msgObj.when).format('YYYY-MM-DD h:mm:ss') : undefined),
         safe       = msgObj.safe,
+        ours       = nick === socketNick,
         color      = 'none',
         html       = '',
         hilited,
@@ -341,13 +342,23 @@ jQuery(document).ready(function($) {
         channels[channel] = {};
       }
 
-      // Keep a copy of message.
+      // Keep a copy of all messages as well as our messages.
       chanMsgs = channels[channel].messages;
       if (chanMsgs) {
          channels[channel].messages.push(msgObj);
+         if (ours) {
+            channels[channel].ourMessages.push(msgObj);
+         }
       } else {
          channels[channel].messages = [msgObj];
+         if (ours) {
+            channels[channel].ourMessages = [msgObj];
+         } else {
+            channels[channel].ourMessages = [];
+         }
       }
+      // Reset msgIdx.
+      channels[channel].msgIdx = null;
 
       containers = $('#channel-containers div[data-channel="' + channel + '"] div.messages ul');
 
@@ -567,26 +578,91 @@ jQuery(document).ready(function($) {
   // Hijack tab behaviour.
   $('form.send').on('keydown', function(e) {
     var keyCode = e.keyCode || e.which,
-        inputEl = $('form.send input[name=message]'),
-        val     = inputEl.val();
+        inputEl,
+        val,
+        channel,
+        messages,
+        msgIdx,
+        msgObj,
+        last;
 
-    if (keyCode === 9) {
-      e.preventDefault();
+    var codes = {
+      9 : function() {
 
-      // A value exists and the last character is not a space, try to autocomplete.
-      if (val && val[val.length-1] !== " ") {
+        console.log('val', val);
+        // A value exists and the last character is not a space, try to autocomplete.
+        if (val && val[val.length-1] !== " ") {
 
-        var channel = history.state.channel,
-            word    = val.split(' ').slice(-1), // We only want the last word to autocomplete.
-            match   = nameComplete(word, channel);
+          var word    = val.split(' ').slice(-1), // We only want the last word to autocomplete.
+              match   = nameComplete(word, channel);
 
-        if (match) {
-          // Plug in the value.
-          var newVal = val.split(' ').slice(0, -1).join(' ') + ' ' +  match + ' ';
-          inputEl.val(newVal);
+          if (match) {
+            // Plug in the value.
+            var newVal = val.split(' ').slice(0, -1).join(' ') + ' ' +  match + ' ';
+            inputEl.val(newVal);
+          }
         }
+
+      },
+      38 : function()  {
+
+        // Up key - walk up message history.
+
+        msgIdx   = channels[channel].msgIdx;
+        messages = channels[channel].ourMessages;
+
+        if (msgIdx === null) {
+          msgIdx = messages.length;
+        }
+
+        if (msgIdx > 0) {
+          msgIdx -= 1;
+        }
+
+        // Set new msg index.
+        channels[channel].msgIdx = msgIdx;
+
+        msgObj = messages[msgIdx];
+
+        inputEl.val(msgObj.msg);
+
+      },
+
+      40 : function() {
+
+        // Down key - walk down message history
+        msgIdx   = channels[channel].msgIdx;
+        messages = channels[channel].ourMessages;
+
+        if (msgIdx < messages.length-1) {
+          msgIdx += 1;
+        }
+
+        // Set new msg index.
+        channels[channel].msgIdx = msgIdx;
+
+        msgObj = messages[msgIdx];
+
+        inputEl.val(msgObj.msg);
+      },
+
+    };
+
+    if (keyCode in codes) {
+
+      channel = history.state ? history.state.channel : false;
+
+      // Make sure we have a channel.
+      if (!channel || !(channel in channels)) {
+        return;
       }
+
+      inputEl = $('form.send input[name=message]');
+      val     = inputEl.val();
+
+      codes[keyCode]();
     }
+
   });
 
   socket.on('ircConnected', function(data) {
