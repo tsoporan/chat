@@ -786,7 +786,7 @@ jQuery(document).ready(function($) {
         mode;
 
     // Show name counts first.
-    nameContainer.append('<li class="names-count"><span class="num">'+ users.length +'</span> users</li>');
+    nameContainer.append('<li class="names-count"><span class="num">'+ (users.length || 1) +'</span> users</li>');
 
     // Show modded nicks first.
     for (var i in mods) {
