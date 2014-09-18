@@ -4,8 +4,8 @@
 A web interface for IRC! Using node.js, express, websockets, and foundation.
 
 
-![image of #chat](http://imgur.com/Ej2rJs6.png)
-![image of #chat](http://imgur.com/D212rJ6.png)
+![image of #chat](http://imgur.com/zVqHKYX.png)
+![image of #chat](http://imgur.com/ihqUNCd.png)
 
 Getting started:
 ----------------
