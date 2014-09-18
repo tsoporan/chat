@@ -564,7 +564,7 @@ jQuery(document).ready(function($) {
     var cached = nickCache[socketNick];
     if (!cached) {
       nickCache[socketNick] = {
-        color: 'black',
+        color: 'none',
       };
     }
 
