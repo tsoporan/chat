@@ -415,11 +415,18 @@ jQuery(document).ready(function($) {
         break;
     }
 
+    scrollToBottom(channel);
+  }
+
+  function scrollToBottom(channel) {
     // Keep scroll at bottom of channel window.
-    var scrollArea = $('div.channel[data-channel="' + channel + '"] .messages');
-    if (scrollArea.length > 0) {
-      var scrollTop  = scrollArea[0].scrollHeight;
-      scrollArea.animate({'scrollTop': scrollTop}, 'slow');
+
+    if (!channels[channel].scrolling) {
+      var scrollArea = $('div.channel[data-channel="' + channel + '"] .messages');
+
+      if (scrollArea.length > 0) {
+        scrollArea.animate({'scrollTop': scrollArea[0].scrollHeight }, 'slow');
+      }
     }
 
   }
@@ -481,6 +488,8 @@ jQuery(document).ready(function($) {
         channelCont.append(channelHTML);
         setContainerHeight({ channel: channel});
       }
+
+      // Switch to channel.
       if (history.state && history.state.channel === channel) {
         existingChannelLink.removeClass('selected').addClass('selected');
       } else {
@@ -491,6 +500,23 @@ jQuery(document).ready(function($) {
         }
         $(window).trigger('pathchange');
       }
+
+      // Hook scrolling.
+      var messagesEl = $('div[data-channel="' + channel +  '"] .messages');
+
+      messagesEl.on('scroll', function() {
+          // Check scroll bar position.
+          var messagesTop    = messagesEl.scrollTop(),
+              messagesHeight = messagesEl.innerHeight(),
+              scrollHeight   = messagesEl[0].scrollHeight,
+              position       = scrollHeight - messagesHeight; // Scroll bar is at the end this will match scrollTop
+
+          if (position === messagesTop || scrollHeight === messagesHeight) {
+            channels[channel].scrolling = false;
+          } else {
+            channels[channel].scrolling = true;
+          }
+      });
 
   }
 
