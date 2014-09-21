@@ -74,6 +74,8 @@ jQuery(document).ready(function($) {
       // Show current channel.
       channelEl.removeClass('hidden');
 
+      // Set focus to typing area.
+      $('input[name=message]').focus();
     }
   });
 
@@ -518,6 +520,7 @@ jQuery(document).ready(function($) {
           }
       });
 
+
   }
 
   // Connecting to IRC from web.
@@ -724,6 +727,7 @@ jQuery(document).ready(function($) {
 
     var menuHTML = '<a>Hi, <span class="menu-nick bold">' + socketNick + '</span></a>' +
                    '<ul class="dropdown">'+
+                   '<li><a id="change-nick">Change Nick</a></li>' +
                    '<li><a id="disconnect">Disconnect</a></li>' +
                    '</ul>';
     $('.top-bar-section li.has-dropdown').append(menuHTML);
@@ -732,6 +736,10 @@ jQuery(document).ready(function($) {
       socket.emit('webCommand', {
         command : '/quit',
       });
+      return false;
+    });
+
+    $('#change-nick').on('click', function() {
       return false;
     });
 
@@ -744,7 +752,9 @@ jQuery(document).ready(function($) {
     postToChannel(msgObj);
 
     // Show the post form.
-    $('form.send').fadeIn('slow');
+    $('form.send').fadeIn('slow', function() {
+      $(this).find('input[name=message]').focus();
+    });
 
   });
 
