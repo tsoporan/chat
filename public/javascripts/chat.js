@@ -161,7 +161,7 @@ jQuery(document).ready(function($) {
         'light_cyan',
         'light_blue',
         'pink',
-        'grey',
+        //'grey',
         'light_grey'
       ];
 
