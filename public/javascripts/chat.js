@@ -74,6 +74,9 @@ jQuery(document).ready(function($) {
       // Show current channel.
       channelEl.removeClass('hidden');
 
+      // Update notifications to read.
+      updateNotifications(channel, 'read');
+
       // Set focus to typing area.
       $('input[name=message]').focus();
     }
@@ -303,6 +306,46 @@ jQuery(document).ready(function($) {
     return newMsg || msg;
   }
 
+  function updateNotifications(channel, action) {
+    console.log('channel', channel, action);
+    var focusedChannel = history.state.channel || 'main',
+        channelListEl  = $('#channel-list li[data-channel="' + channel + '"]'),
+        messageCounter = channelListEl.find('.msg-counter');
+
+    switch (action) {
+      case 'read':
+        messageCounter.fadeOut(function() {
+          messageCounter.remove();
+        });
+
+        break;
+
+      case 'add':
+
+        // If we're focused on this channel do nothing, otherwise update the counters.
+        if (channel === focusedChannel) {
+          return;
+        }
+
+        if (!messageCounter.length) {
+          channelListEl.append('<span class="msg-counter">1</span>');
+        } else {
+
+          var count    = parseInt(messageCounter.text(), 10),
+              newCount = ++count;
+
+           messageCounter.text(newCount);
+        }
+
+        break;
+
+      default:
+
+        break;
+
+    }
+  }
+
   function postToChannel(msgObj) {
 
     console.log('post to channel', msgObj);
@@ -359,6 +402,8 @@ jQuery(document).ready(function($) {
       channels[channel].msgIdx = null;
 
       containers = $('#channel-containers div[data-channel="' + channel + '"] div.messages ul');
+
+      updateNotifications(channel, 'add');
 
     } else { // If no channel is provided send to all channels.
       containers = $('#channel-containers div.messages ul');

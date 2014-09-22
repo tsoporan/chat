@@ -49,6 +49,7 @@
 @names_border : 1px solid #424242;
 
 @error : rgb(248, 58, 58);
+@notification_bubble_bg : @error;
 
 @intro_color : #eee;
 @intro_text_shadow : 3px 3px 0 #1d1d1d;
@@ -276,6 +277,7 @@ hr.intro-sep:after {
 #channel-list li {
   display: inline-block;
   margin: 0 5px;
+  position: relative;
 }
 
 #channel-list  li a {
@@ -299,6 +301,17 @@ hr.intro-sep:after {
 #channels li a.channelLink.selected {
   background: @cl_link_selected_bg;
   color: @white;
+}
+
+#channel-list span.msg-counter {
+  position: absolute;
+  left: -5px;
+  top: -7px;
+  display: block;
+  background: @notification_bubble_bg;
+  border-radius: 50%;
+  font-size: .7em;
+  padding: 2px 7px;
 }
 
 // Channel styles

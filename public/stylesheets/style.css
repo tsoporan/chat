@@ -192,6 +192,7 @@ hr.intro-sep:after {
 #channel-list li {
   display: inline-block;
   margin: 0 5px;
+  position: relative;
 }
 #channel-list li a {
   background: #131313;
@@ -213,6 +214,16 @@ hr.intro-sep:after {
 #channels li a.channelLink.selected {
   background: #636363;
   color: #fafafa;
+}
+#channel-list span.msg-counter {
+  position: absolute;
+  left: -5px;
+  top: -7px;
+  display: block;
+  background: #f83a3a;
+  border-radius: 50%;
+  font-size: .7em;
+  padding: 2px 7px;
 }
 div.channel {
   margin: 20px 0 0;
