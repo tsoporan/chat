@@ -666,12 +666,18 @@ jQuery(document).ready(function($) {
         // A value exists and the last character is not a space, try to autocomplete.
         if (val && val[val.length-1] !== " ") {
 
-          var word    = val.split(' ').slice(-1), // We only want the last word to autocomplete.
-              match   = nameComplete(word, channel);
+          var words   = val.split(' '),
+              last    = val.split(' ').slice(-1), // We only want the last word to autocomplete.
+              match   = nameComplete(last, channel),
+              newVal;
 
           if (match) {
             // Plug in the value.
-            var newVal = val.split(' ').slice(0, -1).join(' ') + ' ' +  match + ' ';
+            if (words.length > 1) {
+              newVal = words.slice(0, -1).join(' ') + ' ' + match + ' ';
+            } else {
+              newVal = match + ' ';
+            }
             inputEl.val(newVal);
           }
         }
@@ -701,7 +707,6 @@ jQuery(document).ready(function($) {
           clearTimeout(timeout);
         }
 
-        // Not ideal, but working way to put cursor at the end.
         timeout = setTimeout(function() {
           inputEl.val(msgObj.msg + ' ');
           inputEl.focus();
