@@ -38,6 +38,11 @@ jQuery(document).ready(function($) {
     }
   }
 
+  // Handle accidentally closing.
+  $(window).on('beforeunload', function() {
+    return 'Leaving this page will disconnect you from chat!';
+  });
+
   // Take care of screen resizes for chat window.
   $(window).on('resize', function() {
     setContainerHeight({ state : history.state });
