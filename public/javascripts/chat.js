@@ -500,6 +500,14 @@ jQuery(document).ready(function($) {
                            (root || isPm ? '' : '<div class="small-3 columns names"><ul class="no-bullet"></ul></div>') +
                            '</div>';
 
+
+      // Store channel.
+      var exists = channel in channels;
+
+      if (!exists) {
+        channels[channel] = {};
+      }
+
       // Check for existing loaded UI, and continue from there.
       var existingChannelLink = channelList.find('li[data-channel="' + channel + '"]');
       if (!existingChannelLink.length) {
