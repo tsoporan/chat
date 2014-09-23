@@ -222,16 +222,47 @@ jQuery(document).ready(function($) {
 
   }
 
-  function changeName(nickObj) {
-    var channel        = nickObj.channel,
-        oldNick        = nickObj.oldNick,
-        nick           = nickObj.nick,
-        nameContainer  = $('div.channel[data-channel="' + channel + '"] div.names ul'),
-        exists         = nameContainer.find('li[data-nick="'+ oldNick +'"]');
+  function changeName(opts) {
+    var channels = opts.channels,
+        oldNick  = opts.oldNick,
+        newNick  = opts.newNick,
+        when     = opts.when,
+        us       = opts.us,
+        nameContainer,
+        exists;
 
-    if (exists.length) {
-      exists.attr('data-nick', nick);
-      exists.find('.nick-text').text(nick);
+    var msgObj = {
+      msg : oldNick + ' changed their name to: ' + newNick,
+      type: 'system',
+      when: when
+    };
+
+    if (us) {
+      socketNick = newNick;
+      $('.menu-nick').text(newNick);
+    }
+
+    if (channels.length) {
+      $.each(channels, function(i, channel) {
+
+        msgObj.channel = channel;
+
+        // Find all name containers for channel and change the names.
+        nameContainer = $('div.channel[data-channel="' + channel + '"] div.names ul');
+        exists        = nameContainer.find('li[data-nick="' + oldNick + '"]');
+
+        if (exists.length) {
+          exists.attr('data-nick', newNick);
+          exists.find('.nick-text').text(newNick);
+        }
+
+        // Notify channel.
+        postToChannel(msgObj);
+
+      });
+    } else {
+      // Notify main channel.
+      postToChannel(msgObj);
     }
 
   }
@@ -462,7 +493,9 @@ jQuery(document).ready(function($) {
         break;
     }
 
-    scrollToBottom(channel);
+    if (channel) {
+      scrollToBottom(channel);
+    }
   }
 
   function scrollToBottom(channel) {
@@ -578,6 +611,7 @@ jQuery(document).ready(function($) {
 
   // Connecting to IRC from web.
   $('form.connect').on('valid.fndtn.abide', function() {
+
     var server     = $('input[name=server]').val(),
         channels   = $('input[name=channels]').val(),
         socketNick = $('input[name=nickName]').val();
@@ -591,6 +625,20 @@ jQuery(document).ready(function($) {
     });
 
     return false;
+  });
+
+  // Changing nick through form.
+  $('form.changenick').on('valid.fndtn.abide', function() {
+      var newNick = $('input[name="newNick"]').val();
+
+      $('a.close-reveal-modal').click();
+
+      socket.emit('webCommand', {
+        command: '/nick ' + newNick,
+      });
+
+      return false;
+
   });
 
   // Sending message from web.
@@ -807,6 +855,7 @@ jQuery(document).ready(function($) {
     });
 
     $('#change-nick').on('click', function() {
+      $('#changeNickModal').foundation('reveal', 'open');
       return false;
     });
 
@@ -920,28 +969,7 @@ jQuery(document).ready(function($) {
         us       = data.us,
         when     = data.when;
 
-
-    if (us) {
-      socketNick = newNick;
-      $('.menu-nick').text(newNick);
-    }
-
-    var msgObj = {
-      msg : oldNick + ' changed their name to: ' + newNick,
-      type: 'system',
-      when: when
-    };
-
-    if (channels.length) {
-      $.each(channels, function(i, channel) {
-        msgObj.channel = channel;
-        changeName({ channel: channel, oldNick: oldNick, nick: newNick });
-        postToChannel(msgObj);
-
-      });
-    } else {
-      postToChannel(msgObj); // Post to root window.
-    }
+    changeName({channels: channels, us : us, oldNick : oldNick, newNick : newNick, when: when });
 
   });
 

@@ -20,10 +20,10 @@ block content
                     li
                       a(id="report", href="https://github.com/tsoporan/chat/issues/new", target="_blank") report bug
 
-              div(id="connectModal", class="reveal-modal radius", data-reveal)
+                div(id="connectModal", class="reveal-modal radius", data-reveal)
                     a.close-reveal-modal &#215;
                     h3.ctext connect
-                    form(class="connect" data-abide="ajax")
+                    form(class="connect", data-abide="ajax")
                         div.input-wrapper
                             label(for="server")
                                 input(type="text", placeholder="ex. irc.freenode.net:6667", name="server", required)
@@ -34,7 +34,18 @@ block content
                         div.input-wrapper
                             label(for="nickName")
                                 input(type="text", placeholder="ex. Zaphod_Beeblebrox", name="nickName")
-                        input(type="submit" value="Connect", name="connect", class="button radius")
+                        div.input-wrapper.ctext
+                            input(type="submit" value="connect", name="connect", class="button radius")
+                div(id="changeNickModal", class="reveal-modal radius", data-reveal)
+                    a.close-reveal-modal &#215;
+                    h3.ctext change nick
+                    form(class="changenick", data-abide="ajax")
+                        div.input-wrapper
+                            label(for="newNick")
+                                input(type="text", placeholder="ex. zaphod_beeblebrox", name="newNick", required)
+                            small.error Nick name is required!
+                        div.input-wrapper.ctext
+                            input(type="submit" value="change", name="changenick", class="button radius")
 
           div.row
             div.small-3.small-centered.columns.fixed.alert-container
