@@ -656,7 +656,7 @@ jQuery(document).ready(function($) {
         msgObj,
         last;
 
-   
+
     var codes = {
       9 : function() {
         if (e) {
@@ -678,7 +678,7 @@ jQuery(document).ready(function($) {
 
       },
       38 : function()  {
-
+        var timeout;
         // Up key - walk up message history.
 
         msgIdx   = channels[channel].msgIdx;
@@ -697,7 +697,15 @@ jQuery(document).ready(function($) {
 
         msgObj = messages[msgIdx];
 
-        inputEl.val(msgObj.msg);
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+
+        // Not ideal, but working way to put cursor at the end.
+        timeout = setTimeout(function() {
+          inputEl.val(msgObj.msg + ' ');
+          inputEl.focus();
+        }, 100);
 
       },
 
@@ -716,7 +724,8 @@ jQuery(document).ready(function($) {
 
         msgObj = messages[msgIdx];
 
-        inputEl.val(msgObj.msg);
+        inputEl.val('');
+        inputEl.val(msgObj.msg + ' ').focus();
       },
 
     };
