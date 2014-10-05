@@ -120,6 +120,7 @@ body {
 }
 .alert-box {
   display: none;
+  color: #fafafa;
 }
 .alert-text {
   font-size: 1.2em;
@@ -131,6 +132,10 @@ body {
   width: 40%;
   left: 0;
   right: 0;
+}
+.alert-box.info {
+  background: #3cb2e2;
+  color: #fafafa;
 }
 div.wrap > div {
   height: 100%;
@@ -149,6 +154,25 @@ div.wrap > div {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
+}
+#conn_status {
+  border-right: 1px solid #3d3d3d;
+  padding: 14px 10px;
+}
+#conn_status span {
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+#conn_status .disconnected {
+  background: #ff2727;
+}
+#conn_status .connected {
+  background: #2cda15;
+}
+#conn_status .reconnecting {
+  background: #e9d923;
 }
 form.connect {
   margin: 20px;
@@ -275,9 +299,6 @@ span.text {
 }
 .message.error {
   color: #f83a3a;
-}
-.message.error .timestamp {
-  color: #3a3a3a;
 }
 div.names {
   overflow: auto;

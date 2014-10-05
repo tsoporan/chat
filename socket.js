@@ -65,6 +65,10 @@ io.on('connection', function(socket) {
         channels = [];
       }
 
+      if (channels.indexOf('main') !== -1) {
+        channels.splice(channels.indexOf('main'), 1);
+      }
+
       // Create IRC client
       var client = new irc.Client(
         server,
@@ -340,11 +344,9 @@ io.on('connection', function(socket) {
 
       console.log('welcome', welcome);
 
-      var server,
-          serverMsg,
+      var serverMsg,
           nick;
 
-      server     = welcome.server;
       nick       = welcome.args[0];
       serverMsg  = welcome.args[1];
 
@@ -361,6 +363,7 @@ io.on('connection', function(socket) {
       socket.emit('ircConnected', {
         clientsCount : Object.keys(clients).length,
         server       : server,
+        port         : port,
         serverMsg    : serverMsg,
         nick         : nick,
         when         : moment(),

@@ -1,10 +1,11 @@
 jQuery(document).ready(function($) {
   'use strict';
 
-  var socket    = io(),
+  var socket    = io({ reconnectionAttempts: 5}),
       connected = false,
       channels  = {},
       nickCache = {},
+      connInfo = {},
       socketNick;
 
   // Startswith functionality for String.
@@ -186,6 +187,11 @@ jQuery(document).ready(function($) {
         container = $('.alert-container'),
         html;
 
+    if (container.find('.'+level).length) {
+      // Do not create duplicate warnings of the same label.
+      return;
+    }
+
     html = '<div data-alert class="alert-box ctext radius ' + level + ' ' + label + '">' +
            '<span class="alert-text">' + msg + '</span>' +
            '<a class="close">&times;</a>' +
@@ -208,6 +214,15 @@ jQuery(document).ready(function($) {
     }
   }
 
+  function updateConnStatus(label) {
+    var statusContainer = $('#conn_status');
+
+    statusContainer.empty();
+
+    // Add status.
+    statusContainer.append('<span class="'+ label +'"></span>');
+  }
+
   function addToNames(nickObj) {
 
     var channel        = nickObj.channel,
@@ -219,11 +234,14 @@ jQuery(document).ready(function($) {
         namesCount     = parseInt(numContainer.text(), 10),
         newCount       = ++namesCount;
 
-    nickHTML = '<li class="nick ltext" data-nick="'+ nick +'"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
-    nameContainer.append(nickHTML);
+    // Only append if it does not exist.
+    if (nameContainer.find('li[data-nick="'+ nick + '"]').length === 0) {
+      nickHTML = '<li class="nick ltext" data-nick="'+ nick +'"><span class="mode">' + mode + '</span> <span class="nick-text">' + nick + '</span></li>';
+      nameContainer.append(nickHTML);
 
-    // Update counts.
-    numContainer.text(newCount);
+      // Update counts.
+      numContainer.text(newCount);
+    }
 
   }
 
@@ -538,6 +556,10 @@ jQuery(document).ready(function($) {
                            (root || isPm ? '' : '<div class="small-3 columns names"><ul class="no-bullet"></ul></div>') +
                            '</div>';
 
+      if (channel !== 'main') {
+        closeAlert('connected');
+      }
+
 
       // Store channel.
       var exists = channel in channels;
@@ -821,9 +843,15 @@ jQuery(document).ready(function($) {
 
     var when         = data.when,
         server       = data.server,
+        port         = data.port,
         serverMsg    = data.serverMsg,
         clientsCount = data.clientsCount,
         gotChannels  = data.channels.length;
+
+    // Store connection info.
+    connInfo.server   = server;
+    connInfo.nick     = socketNick;
+    connInfo.port     = port;
 
     var msgObj = {
       channel : 'main',
@@ -837,6 +865,7 @@ jQuery(document).ready(function($) {
 
     // Close connecting show connected.
     closeAlert('connecting');
+    closeAlert('reconnectirc');
 
     if (gotChannels) {
       createAlert({ msg: 'Connected! Joining rooms ...', level: 'success', label: 'connected' });
@@ -845,12 +874,21 @@ jQuery(document).ready(function($) {
     // Hide the connect and show the user menu.
     $('#connect').addClass('hidden');
 
-    var menuHTML = '<a>Hi, <span class="menu-nick bold">' + socketNick + '</span></a>' +
-                   '<ul class="dropdown">'+
-                   '<li><a id="change-nick">Change Nick</a></li>' +
-                   '<li><a id="disconnect">Disconnect</a></li>' +
-                   '</ul>';
-    $('.top-bar-section li.has-dropdown').append(menuHTML);
+
+    // Append menu if it doesn't already exist.
+    if ($('.top-bar-section li.has-dropdown').find('.dropdown').length === 0) {
+
+      var menuHTML = '<a>Hi, <span class="menu-nick bold">' + socketNick + '</span></a>' +
+                     '<ul class="dropdown">'+
+                     '<li><a id="change-nick">Change Nick</a></li>' +
+                     '<li><a id="disconnect">Disconnect</a></li>' +
+                     '</ul>';
+      $('.top-bar-section li.has-dropdown').append(menuHTML);
+
+    } else {
+      // Update nick.
+      $('.menu-nick').text(socketNick);
+    }
 
     $('#disconnect').on('click', function() {
       socket.emit('webCommand', {
@@ -942,6 +980,9 @@ jQuery(document).ready(function($) {
         mode;
 
     // Show name counts first.
+    if (nameContainer.children().length) {
+      nameContainer.empty();
+    }
     nameContainer.append('<li class="names-count"><span class="num">'+ (users.length || 1) +'</span> users</li>');
 
     // Show modded nicks first.
@@ -1237,30 +1278,74 @@ jQuery(document).ready(function($) {
 
   });
 
+
   // Handle socket connect/reconnect/disconnects.
   socket.on('connect', function() {
     console.log(' ** socket connected', arguments);
+    closeAlert('disconnected');
+
+    updateConnStatus('connected');
+
   });
   socket.on('error', function() {
     console.log(' ** socket error', arguments);
   });
   socket.on('disconnect', function() {
     console.log(' ** socket disconnect', arguments);
+
+    createAlert({ msg: 'Disconnected!', level : 'alert', label: 'disconnected' });
+
+    updateConnStatus('disconnected');
+
   });
   socket.on('reconnect', function() {
     console.log(' ** socket reconnect', arguments);
+
+    updateConnStatus('connected');
+    closeAlert('reconnecting');
+
+    // Try to reconnect to server and rejoin channels.
+    if (Object.keys(connInfo).length) {
+      var opts = {
+        server  : connInfo.server + ':' + connInfo.port,
+        channels: Object.keys(channels),
+      };
+
+      if (opts.channels.indexOf('main') !== -1) {
+        opts.channels.splice(opts.channels.indexOf('main'), 1);
+      }
+
+      opts.channels = opts.channels.join(',');
+
+      console.log('reconnected, attempting to join server and channels', opts);
+
+      createAlert({ msg: 'Reconnecting to ' + opts.server + ' and channels: ' + opts.channels + ' ...', level: 'info', label: 'reconnectirc'});
+
+      connectToIRC(opts);
+    }
+
   });
   socket.on('reconnect_attempt', function() {
     console.log(' ** socket reconnect attempt', arguments);
   });
   socket.on('reconnecting', function() {
     console.log(' ** socket reconnecting', arguments);
+
+    updateConnStatus('reconnecting');
+
+    closeAlert('disconnected');
+    createAlert({msg : 'Trying to reconnect ... ', level: 'warning', label: 'reconnecting'});
+
   });
   socket.on('reconnect_error', function() {
     console.log(' ** socket reconnect error', arguments);
   });
   socket.on('reconnect_failed', function() {
-    console.log(' ** socket reconnect failed', arguments);
+    console.log(' ** socket reconnect  failed', arguments);
+    closeAlert('reconnecting');
+
+    updateConnStatus('disconnected');
+    createAlert({ msg: 'Reconnect failed! Please refresh the page manually.', level : 'alert', label: 'disconnected' });
   });
 
   $(document).foundation();
