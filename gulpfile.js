@@ -1,7 +1,7 @@
 // Building with Gulp.
 
 var gulp       = require('gulp'),
-    del        = require('del'),
+    rimraf     = require('gulp-rimraf'),
     bowerFiles = require('main-bower-files'),
     uglify     = require('gulp-uglify'),
     concat     = require('gulp-concat'),
@@ -12,12 +12,11 @@ var gulp       = require('gulp'),
     rev        = require('gulp-rev');
 
 gulp.task('clean', function() {
-    return del([
-      'public/build/*',
-    ]);
+    return gulp.src('public/build/*', { read: false })
+          .pipe(rimraf({ force: true }));
 });
 
-gulp.task('collect-libs', function() {
+gulp.task('collect-libs', ['clean', 'copy-socketio'], function() {
   return gulp.src(bowerFiles())
          .pipe(gulp.dest('public/build/libs'));
 });
@@ -28,7 +27,7 @@ gulp.task('less', function() {
   .pipe(gulp.dest('public/stylesheets/'));
 });
 
-gulp.task('build-css', ['less'], function() {
+gulp.task('build-css', ['collect-libs', 'less'], function() {
   return gulp.src(['public/build/libs/*.css', 'public/stylesheets/*.css'])
   .pipe(minify())
   .pipe(concat('build.min.css'))
@@ -41,20 +40,20 @@ gulp.task('lint', function() {
   .pipe(hint.reporter('default'));
 });
 
-gulp.task('copy-socketio', function() {
+gulp.task('copy-socketio', ['clean'], function() {
   return gulp.src('bower_components/socket.io-client/socket.io.js')
          .pipe(gulp.dest('public/build/libs'));
 });
 
-gulp.task('build-js', ['copy-socketio', 'lint'], function() {
+gulp.task('build-js', ['collect-libs', 'lint'], function() {
 
     return gulp.src(['public/build/libs/socket.io.js',
                      'public/build/libs/moment.js',
                      'public/build/libs/angular.js',
-                     'public/javascripts/chat.js' // App
+                     'public/javascripts/*.js' // App
     ])
     .pipe(concat('build.js'))
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(rename('build.min.js'))
     .pipe(gulp.dest('public/build'));
 });
@@ -68,4 +67,4 @@ gulp.task('rev', ['build-css', 'build-js'], function() {
   .pipe(gulp.dest('public/build'));
 });
 
-gulp.task('default', ['clean', 'collect-libs', 'build-css', 'build-js', 'rev']);
+gulp.task('default', ['collect-libs', 'rev']);
