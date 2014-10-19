@@ -9,7 +9,10 @@ var gulp       = require('gulp'),
     less       = require('gulp-less'),
     minify     = require('gulp-minify-css'),
     hint       = require('gulp-jshint'),
-    rev        = require('gulp-rev');
+    rev        = require('gulp-rev'),
+    usemin     = require('gulp-jade-usemin'),
+    replace    = require('gulp-replace'),
+    fs         = require('fs');
 
 gulp.task('clean', function() {
     return gulp.src('public/build/*', { read: false })
@@ -27,11 +30,17 @@ gulp.task('less', function() {
   .pipe(gulp.dest('public/stylesheets/'));
 });
 
-gulp.task('build-css', ['collect-libs', 'less'], function() {
+gulp.task('concat-css', ['collect-libs', 'less'], function() {
   return gulp.src(['public/build/libs/*.css', 'public/stylesheets/*.css'])
-  .pipe(minify())
-  .pipe(concat('build.min.css'))
-  .pipe(gulp.dest('public/build'));
+  .pipe(concat('build.css'))
+  .pipe(gulp.dest('public/build'))
+});
+
+gulp.task('build-css', ['concat-css'], function() {
+  return gulp.src('public/build/build.css')
+        .pipe(rename('build.min.css'))
+        .pipe(minify())
+        .pipe(gulp.dest('public/build'));
 });
 
 gulp.task('lint', function() {
@@ -45,7 +54,7 @@ gulp.task('copy-socketio', ['clean'], function() {
          .pipe(gulp.dest('public/build/libs'));
 });
 
-gulp.task('build-js', ['collect-libs', 'lint'], function() {
+gulp.task('concat-js', ['collect-libs', 'lint'], function() {
 
     return gulp.src(['public/build/libs/socket.io.js',
                      'public/build/libs/moment.js',
@@ -53,13 +62,18 @@ gulp.task('build-js', ['collect-libs', 'lint'], function() {
                      'public/javascripts/*.js' // App
     ])
     .pipe(concat('build.js'))
-    //.pipe(uglify())
-    .pipe(rename('build.min.js'))
     .pipe(gulp.dest('public/build'));
 });
 
+gulp.task('build-js', ['concat-js'], function() {
+  return gulp.src('public/build/build.js')
+        .pipe(rename('build.min.js'))
+        .pipe(uglify())
+        .pipe(gulp.dest('public/build'));
+});
+
 gulp.task('rev', ['build-css', 'build-js'], function() {
-  return gulp.src(['public/build/*.js', 'public/build/*.css'], {base: 'public/build'})
+  return gulp.src(['public/build/build.min.js', 'public/build/build.min.css'], {base: 'public/build'})
   .pipe(gulp.dest('public/build'))
   .pipe(rev())
   .pipe(gulp.dest('public/build'))
@@ -67,4 +81,24 @@ gulp.task('rev', ['build-css', 'build-js'], function() {
   .pipe(gulp.dest('public/build'));
 });
 
-gulp.task('default', ['collect-libs', 'rev']);
+gulp.task('clean-built', ['rev'], function() {
+  return gulp.src(['public/build/build.min.js', 'public/build/build.min.css'])
+        .pipe(rimraf());
+});
+
+gulp.task('template-replace', function() {
+
+  var manifest  = JSON.parse(fs.readFileSync('public/build/rev-manifest.json')),
+      assetPath = '/build/';
+
+  var jsPath  = assetPath + manifest['build.min.js'],
+      cssPath = assetPath + manifest['build.min.css'];
+
+  return gulp.src('views/layout.jade.tpl')
+        .pipe(replace('//builtjs', 'script(src="' + jsPath + '")'))
+        .pipe(replace('//builtcss', 'link(rel="stylesheet", href="' + cssPath +'")'))
+        .pipe(rename('layout.jade'))
+        .pipe(gulp.dest('views'));
+});
+
+gulp.task('default', ['collect-libs', 'rev', 'clean-built', 'template-replace']);
