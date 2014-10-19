@@ -1,3 +1,6 @@
+*NOTE: This is the 'angular' branch and is still under active development, it may not be operational. If you want something working switch to 'master' and use that codebase. The angular branch is a fairly large refactor and includes these changes: angularjs, drop foundation in favor of bootstrap, drop jquery, mobile first design*
+
+
  #chat
 ======
 
