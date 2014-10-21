@@ -10,7 +10,6 @@ var gulp       = require('gulp'),
     minify     = require('gulp-minify-css'),
     hint       = require('gulp-jshint'),
     rev        = require('gulp-rev'),
-    usemin     = require('gulp-jade-usemin'),
     replace    = require('gulp-replace'),
     fs         = require('fs');
 
