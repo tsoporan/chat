@@ -32,7 +32,7 @@ gulp.task('less', function() {
 gulp.task('concat-css', ['collect-libs', 'less'], function() {
   return gulp.src(['public/build/libs/*.css', 'public/stylesheets/*.css'])
   .pipe(concat('build.css'))
-  .pipe(gulp.dest('public/build'))
+  .pipe(gulp.dest('public/build'));
 });
 
 gulp.task('build-css', ['concat-css'], function() {
@@ -85,7 +85,7 @@ gulp.task('clean-built', ['rev'], function() {
         .pipe(rimraf());
 });
 
-gulp.task('template-replace', function() {
+gulp.task('template-replace', ['rev'],  function() {
 
   var manifest  = JSON.parse(fs.readFileSync('public/build/rev-manifest.json')),
       assetPath = '/build/';
