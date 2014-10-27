@@ -5,6 +5,7 @@ var fs = require('fs');
 router.get('/', function(req, res) {
   res.render('index', {
     title          : '#chat',
+    debug          :  req.app.get('env') === 'development' ? true : false,
   });
 });
 

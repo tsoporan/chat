@@ -2,14 +2,21 @@ doctype html
 html(lang="en", ng-app="chatApp")
   head
     meta(charset="utf-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(http-equiv="X-UA-Compatible", content="IE-Edge")
+
+    meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no")
     title= title
 
     block assets
         link(rel="stylesheet", href="//fonts.googleapis.com/css?family=Lobster")
 
-        script(src="/build/build.min-da2d2912.js")
-        link(rel="stylesheet", href="/build/build.min-e5f362bc.css")
+        if (debug)
+            script(src="/build/build.js")
+            link(href="/build/build.css" rel="stylesheet")
+        else
+            script(src="/build/build.min-fb2bbcfc.js")
+            link(rel="stylesheet", href="/build/build.min-d8cc57c2.css")
+
 
   body
     block content

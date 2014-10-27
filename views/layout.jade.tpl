@@ -10,8 +10,13 @@ html(lang="en", ng-app="chatApp")
     block assets
         link(rel="stylesheet", href="//fonts.googleapis.com/css?family=Lobster")
 
-        //builtjs
-        //builtcss
+        if (debug)
+            script(src="/build/build.js")
+            link(href="/build/build.css" rel="stylesheet")
+        else
+            //builtjs
+            //builtcss
+
 
   body
     block content

@@ -10,7 +10,7 @@ var routes = require('./routes/index');
 
 var app = express();
 
-var env = 'production'; // development
+var env = 'development';
 var port = 3000;
 
 // view engine setup
@@ -18,7 +18,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.set('env', env);
 app.set('port', port);
-
 
 app.use(favicon());
 app.use(logger('dev'));
@@ -61,7 +60,4 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
 module.exports = app;
-
-
