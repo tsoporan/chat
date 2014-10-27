@@ -27,6 +27,10 @@
     "moment-timezone": "~0.2.2",
     "angular": "1.3.0-rc.5",
     "socket.io-client": "~1.1.0",
-    "bootstrap": "~3.2.0"
+    "bootstrap": "~3.2.0",
+    "mobile-angular-ui": "~1.1.0-beta.30",
+    "angular-touch": "~1.3.0",
+    "angular-route": "~1.3.0",
+    "fontawesome": "~4.2.0"
   }
 }
