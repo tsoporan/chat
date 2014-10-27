@@ -14,11 +14,16 @@ var gulp       = require('gulp'),
     fs         = require('fs');
 
 gulp.task('clean', function() {
-    return gulp.src('public/build/*', { read: false })
+    return gulp.src(['public/build/*', 'public/fonts/*'], { read: false })
           .pipe(rimraf({ force: true }));
 });
 
-gulp.task('collect-libs', ['clean', 'copy-socketio'], function() {
+gulp.task('collect-fonts', ['clean'], function() {
+  return gulp.src('bower_components/fontawesome/fonts/*')
+        .pipe(gulp.dest('public/fonts'));
+});
+
+gulp.task('collect-libs', ['clean', 'copy-socketio', 'collect-fonts'], function() {
   return gulp.src(bowerFiles())
          .pipe(gulp.dest('public/build/libs'));
 });
@@ -56,8 +61,11 @@ gulp.task('copy-socketio', ['clean'], function() {
 gulp.task('concat-js', ['collect-libs', 'lint'], function() {
 
     return gulp.src(['public/build/libs/socket.io.js',
-                     'public/build/libs/moment.js',
+                     //'public/build/libs/moment.js',
                      'public/build/libs/angular.js',
+                     'public/build/libs/angular-route.js',
+                     'public/build/libs/angular-touch.js',
+                     'public/build/libs/mobile-angular-ui.min.js',
                      'public/javascripts/*.js' // App
     ])
     .pipe(concat('build.js'))
