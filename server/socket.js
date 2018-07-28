@@ -1,15 +1,13 @@
-// #chat server side logics.
+/*
+ * Socket event handling
+ */
 
-var http       = require('http'),
-    app        = require('./app'),
-    socketio   = require('socket.io'),
-    irc        = require('irc'),
-    moment     = require('moment'),
-    httpServer = http.Server(app),
-    io         = socketio(httpServer),
-    clients    = {},
-    nickPool   = [],
-    guestInt   = 0;
+const io = require("app");
+const irc      = require('irc');
+const moment   = require('moment');
+const clients  = {};
+const nickPool = [];
+let guestCount = 0;
 
 
 // On connection store the socket and newly created client
@@ -53,8 +51,8 @@ io.on('connection', function(socket) {
 
       // If we don't have a nick at this point set a guest one.
       if (!nick) {
-        nick = 'Guest' + guestInt;
-        guestInt++;
+        nick = 'Guest' + guestCount;
+        guestCount++;
       }
       nickPool.push(nick);
 
@@ -574,5 +572,3 @@ io.on('connection', function(socket) {
   });
 
 });
-
-module.exports = httpServer;

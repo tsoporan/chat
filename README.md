@@ -1,37 +1,35 @@
- #chat
-======
+## #chat
 
-A web interface for IRC! Using node.js, express, websockets, and foundation.
-
+A web interface for IRC.
 
 ![image of #chat](http://imgur.com/zVqHKYX.png)
 ![image of #chat](http://imgur.com/ihqUNCd.png)
 
-Getting started:
-----------------
+### Tech
 
-Requirements:
+- Express
+- Socket.io/WebSockets
+- React
 
-```
-node (npm comes with node)
-```
+### Requirements
 
-Clone the repository:
-```
+- Node 8+
+- `yarn`
+
+### Getting started
+
+0. Clone the repository
+```bash
 git clone https://github.com/tsoporan/chat.git chat
 ```
 
-Install deps:
-```
-cd chat; npm install
-```
-
-Start it up:
-```
-npm start
+1. Deps
+```bash
+cd chat && yarninstall
 ```
 
-See in action:
-``` 
-http://localhost:3000/
+2. Start 'er up:
+
+```bash
+yarn start
 ```
