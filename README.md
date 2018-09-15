@@ -25,11 +25,10 @@ git clone https://github.com/tsoporan/chat.git chat
 
 1. Deps
 ```bash
-cd chat && yarninstall
+cd chat && yarn install
 ```
 
 2. Start 'er up:
-
 ```bash
 yarn start
 ```
