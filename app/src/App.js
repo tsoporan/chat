@@ -1,13 +1,17 @@
 import React, { Component } from "react";
 
-import { Container, Header, Divider } from "semantic-ui-react";
+import { Container, Divider } from "semantic-ui-react";
+
+import AppHeader from "./components/Header";
+import ChannelsContainer from "./components/ChannelsContainer";
 
 class App extends Component {
   render() {
     return (
       <Container fluid>
-        <Header as="h1">#chat</Header>
+        <AppHeader />
         <Divider />
+        <ChannelsContainer />
       </Container>
     );
   }
