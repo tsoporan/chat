@@ -2,8 +2,8 @@ import React, { Component } from "react";
 
 import { Container, Divider } from "semantic-ui-react";
 
-import AppHeader from "./components/Header";
-import ChannelsContainer from "./components/ChannelsContainer";
+import AppHeader from "./AppHeader";
+import AppRouter from "./AppRouter";
 
 class App extends Component {
   render() {
@@ -11,7 +11,7 @@ class App extends Component {
       <Container fluid>
         <AppHeader />
         <Divider />
-        <ChannelsContainer />
+        <AppRouter />
       </Container>
     );
   }
