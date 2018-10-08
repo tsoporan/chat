@@ -1,7 +1,7 @@
-import React, { Fragment } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 
-import { Grid, Segment } from "semantic-ui-react";
+import { Grid } from "semantic-ui-react";
 
 import {
   ChannelHeader,
@@ -14,9 +14,11 @@ function Channel(props) {
   const { match } = props;
 
   return (
-    <Grid>
+    <Grid padded>
       <Grid.Row>
-        <ChannelHeader />
+        <Grid.Column>
+          <ChannelHeader />
+        </Grid.Column>
       </Grid.Row>
 
       <Grid.Row>
@@ -29,8 +31,9 @@ function Channel(props) {
       </Grid.Row>
 
       <Grid.Row>
-        <ChannelMessageBox />
-        {match.params.id}
+        <Grid.Column>
+          <ChannelMessageBox />
+        </Grid.Column>
       </Grid.Row>
     </Grid>
   );
