@@ -1,7 +1,9 @@
 import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+
+import AppNotFound from "./AppNotFound";
 
 import Landing from "../pages/Landing";
 import Channel from "../pages/Channel";
@@ -11,8 +13,11 @@ function AppRouter(props) {
     <Router>
       <Fragment>
         {props.children}
-        <Route exact path="/" component={Landing} />
-        <Route path="/channel/:id" component={Channel} />
+        <Switch>
+          <Route exact path="/" component={Landing} />
+          <Route path="/channel/:id" component={Channel} />
+          <Route component={AppNotFound} />
+        </Switch>
       </Fragment>
     </Router>
   );
