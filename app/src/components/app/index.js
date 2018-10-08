@@ -8,11 +8,12 @@ import AppRouter from "./AppRouter";
 class App extends Component {
   render() {
     return (
-      <Container fluid>
-        <AppHeader />
-        <Divider />
-        <AppRouter />
-      </Container>
+      <AppRouter>
+        <Container fluid>
+          <AppHeader />
+          <Divider />
+        </Container>
+      </AppRouter>
     );
   }
 }

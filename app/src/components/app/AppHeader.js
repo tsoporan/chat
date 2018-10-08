@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Link } from "react-router-dom";
+
 import { Header, Segment } from "semantic-ui-react";
 
 function AppHeader() {
@@ -8,7 +10,9 @@ function AppHeader() {
       <Segment>
         <Header as="h1">#chat</Header>
       </Segment>
-      <Segment>Links</Segment>
+      <Segment>
+        <Link to="/">Home</Link>
+      </Segment>
     </Segment.Group>
   );
 }
