@@ -9,18 +9,23 @@ const clients = {};
 const nickPool = [];
 let guestCount = 0;
 
+function log(msg) {
+  // eslint-disable-next-line
+  console.log(msg);
+}
+
 // On connection store the socket and newly created client
 io.on("connection", function(socket) {
-  console.log("Socket connected: " + socket.id);
+  log("Socket connected: " + socket.id);
 
   socket.on("disconnect", function() {
-    console.log("*** socket disconnect", arguments);
+    log("*** socket disconnect", arguments);
 
     // Clean up.
     var user = clients[socket.id];
     if (user && user.client) {
       user.client.disconnect(function() {
-        console.log("client disconnected for: ", user.nick);
+        log("client disconnected for: ", user.nick);
       });
     }
 
@@ -34,7 +39,7 @@ io.on("connection", function(socket) {
       nick = data.nick;
 
     // Check for duplicate connections for client.
-    exists = clients[socket.id];
+    var exists = clients[socket.id];
 
     if (exists) {
       socket.emit("systemMessage", {
@@ -102,7 +107,7 @@ io.on("connection", function(socket) {
         msg = err.args[2],
         all = err.args;
 
-      console.log("on error", nick, channel, msg);
+      log("on error", nick, channel, msg);
 
       socket.emit("ircError", {
         msg: msg,
@@ -113,7 +118,7 @@ io.on("connection", function(socket) {
       });
     });
 
-    client.on("quit", function(nick, reason, channels, message) {
+    client.on("quit", function(nick, reason, channels) {
       var user = clients[socket.id],
         toSend = {
           nick: nick,
@@ -132,7 +137,7 @@ io.on("connection", function(socket) {
       socket.emit("ircQuit", toSend);
     });
 
-    client.on("join", function(channel, nick, message) {
+    client.on("join", function(channel, nick) {
       var user = clients[socket.id],
         toSend = {
           channel: channel,
@@ -155,7 +160,7 @@ io.on("connection", function(socket) {
       socket.emit("ircJoin", toSend);
     });
 
-    client.on("part", function(channel, nick, reason, message) {
+    client.on("part", function(channel, nick, reason) {
       var user = clients[socket.id],
         toSend = {
           channel: channel,
@@ -181,8 +186,8 @@ io.on("connection", function(socket) {
       socket.emit("ircPart", toSend);
     });
 
-    client.on("message", function(nick, to, text, message) {
-      console.log("on message", nick, to, text);
+    client.on("message", function(nick, to, text) {
+      log("on message", nick, to, text);
 
       var user = clients[socket.id],
         toSend = {
@@ -202,7 +207,7 @@ io.on("connection", function(socket) {
       socket.emit("ircMessage", toSend);
     });
 
-    client.on("nick", function(oldNick, newNick, channels, message) {
+    client.on("nick", function(oldNick, newNick, channels) {
       var user = clients[socket.id],
         toSend = {
           oldNick: oldNick,
@@ -276,8 +281,6 @@ io.on("connection", function(socket) {
     });
 
     client.on("raw", function(message) {
-      // console.log('*** RAW MESSAGE: ', message);
-
       // Handle PRIVMSG actions since 'message' doesn't catch them.
       var rawCommand = message.rawCommand,
         nick = message.nick,
@@ -313,7 +316,7 @@ io.on("connection", function(socket) {
     });
 
     client.connect(function(welcome) {
-      console.log("welcome", welcome);
+      log("welcome", welcome);
 
       var serverMsg, nick;
 
@@ -344,10 +347,9 @@ io.on("connection", function(socket) {
     // Handle web chat logic.
     socket.on("webMessage", function(data) {
       var target = data.target,
-        msg = data.msg,
-        pm = data.pm;
+        msg = data.msg;
 
-      console.log("on webmessage", data);
+      log("on webmessage", data);
 
       // Say in IRC.
       if (target !== "main") {
@@ -393,7 +395,7 @@ io.on("connection", function(socket) {
           client.send("PART", channel, reason);
         } else {
           // Handle leaving of PM
-          var user = clients[socket.id],
+          var ]ser = clients[socket.id],
             toSend = {
               channel: "@" + channel, // PM
               us: true
@@ -550,7 +552,7 @@ io.on("connection", function(socket) {
       } else {
         return sendError(
           channel,
-          'Command "' + cmdPart + '" is not recognized.'
+          "Command \"" + cmdPart + "\" is not recognized."
         );
       }
     });
