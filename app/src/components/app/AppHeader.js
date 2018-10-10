@@ -1,18 +1,25 @@
 import React from "react";
 
-import { Link } from "react-router-dom";
+import { Grid, Header, List, Button } from "semantic-ui-react";
 
-import { Grid, Header } from "semantic-ui-react";
+import AppConnectModal from "./AppConnectModal";
 
 function AppHeader() {
   return (
-    <Grid>
-      <Grid.Row>
-        <Grid.Column width={8}>
+    <Grid padded>
+      <Grid.Row fluid>
+        <Grid.Column width={12}>
           <Header as="h1">#chat</Header>
         </Grid.Column>
-        <Grid.Column width={8}>
-          <Link to="/">Home</Link>
+        <Grid.Column width={4} textAlign="right">
+          <List horizontal>
+            <List.Item>
+              <AppConnectModal />
+            </List.Item>
+            <List.Item>
+              <Button>GitHub</Button>
+            </List.Item>
+          </List>
         </Grid.Column>
       </Grid.Row>
     </Grid>
