@@ -18,6 +18,10 @@ class App extends Component {
         online: true
       });
     });
+
+    Socket.on("disconnect", () => {
+      this.setState({ online: false });
+    });
   }
 
   render() {
