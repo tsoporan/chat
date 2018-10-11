@@ -1,18 +1,22 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import { Grid, Header, List, Button } from "semantic-ui-react";
 
 import AppConnectModal from "./AppConnectModal";
 
-function AppHeader() {
+function AppHeader({ online }) {
   return (
     <Grid padded>
-      <Grid.Row fluid>
-        <Grid.Column width={12}>
+      <Grid.Row>
+        <Grid.Column width={8}>
           <Header as="h1">#chat</Header>
         </Grid.Column>
-        <Grid.Column width={4} textAlign="right">
+        <Grid.Column width={8} textAlign="right">
           <List horizontal>
+            <List.Item>
+              <p>{online ? "Online" : "Offline"}</p>
+            </List.Item>
             <List.Item>
               <AppConnectModal />
             </List.Item>
@@ -25,5 +29,9 @@ function AppHeader() {
     </Grid>
   );
 }
+
+AppHeader.propTypes = {
+  online: PropTypes.bool
+};
 
 export default AppHeader;

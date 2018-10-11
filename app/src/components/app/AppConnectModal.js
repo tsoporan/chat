@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Modal, Header, Button, Icon, Form } from "semantic-ui-react";
+import { Modal, Button, Icon, Form } from "semantic-ui-react";
 
 class ConnectModal extends React.Component {
   state = { modalOpen: false };
