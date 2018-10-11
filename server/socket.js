@@ -2,7 +2,7 @@
  * Socket event handling
  */
 
-const io = require("app");
+const socketServer = require("server");
 const irc = require("irc");
 const moment = require("moment");
 const clients = {};
@@ -15,7 +15,7 @@ function log(msg) {
 }
 
 // On connection store the socket and newly created client
-io.on("connection", function(socket) {
+socketServer.on("connection", function(socket) {
   log("Socket connected: " + socket.id);
 
   socket.on("disconnect", function() {
@@ -395,7 +395,7 @@ io.on("connection", function(socket) {
           client.send("PART", channel, reason);
         } else {
           // Handle leaving of PM
-          var ]ser = clients[socket.id],
+          var user = clients[socket.id],
             toSend = {
               channel: "@" + channel, // PM
               us: true
