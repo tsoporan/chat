@@ -1,10 +1,14 @@
 import React, { Component } from "react";
-
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Container } from "semantic-ui-react";
 
 import Socket from "../socket";
 
-import AppRouter from "./app/AppRouter";
+import AppHeader from "./app/AppHeader";
+
+import Landing from "./pages/Landing";
+import Channel from "./pages/Channel";
+import NotFound from "./pages/NotFound";
 
 class App extends Component {
   state = {
@@ -28,7 +32,16 @@ class App extends Component {
 
     return (
       <Container fluid style={{ height: "100%" }}>
-        <AppRouter />
+        <Router>
+          <div>
+            <AppHeader online={online} />
+            <Switch>
+              <Route exact path="/" component={Landing} />
+              <Route path="/channel/:id" component={Channel} />
+              <Route component={NotFound} />
+            </Switch>
+          </div>
+        </Router>
       </Container>
     );
   }
