@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { Link } from "react-router-dom";
 import { Grid, Header, List, Button } from "semantic-ui-react";
 
 import AppConnectModal from "./AppConnectModal";
@@ -10,7 +11,9 @@ function AppHeader({ online }) {
     <Grid padded>
       <Grid.Row>
         <Grid.Column width={8}>
-          <Header as="h1">#chat</Header>
+          <Header as="h1">
+            <Link to="/">#chat</Link>
+          </Header>
         </Grid.Column>
         <Grid.Column width={8} textAlign="right">
           <List horizontal>

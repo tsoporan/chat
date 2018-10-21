@@ -4,7 +4,6 @@ import { Container } from "semantic-ui-react";
 
 import Socket from "../socket";
 
-import AppHeader from "./app/AppHeader";
 import AppRouter from "./app/AppRouter";
 
 class App extends Component {
@@ -29,7 +28,6 @@ class App extends Component {
 
     return (
       <Container fluid style={{ height: "100%" }}>
-        <AppHeader online={online} />
         <AppRouter />
       </Container>
     );
