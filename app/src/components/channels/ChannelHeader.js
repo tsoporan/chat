@@ -2,12 +2,12 @@ import React from "react";
 
 import { List, Button } from "semantic-ui-react";
 
-const channels = ["#Foo", "#Bar", "#Baz", "#Bat"];
-
 function ChannelHeader() {
-  const listItems = channels.map((channel, idx) => (
+  const rooms = ["#Foo", "#Bar", "#Baz", "#Bat"];
+
+  const listItems = rooms.map((room, idx) => (
     <List.Item key={idx}>
-      <Button>{channel}</Button>
+      <Button>{room}</Button>
     </List.Item>
   ));
 

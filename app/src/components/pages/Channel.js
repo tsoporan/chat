@@ -21,7 +21,7 @@ function Channel(props) {
         </Grid.Column>
       </Grid.Row>
 
-      <Grid.Row style={{ height: "calc(100vh - 220px)" }}>
+      <Grid.Row style={{ height: "calc(100vh - 220px)", overflow: "auto" }}>
         <Grid.Column width={12}>
           <ChannelMessages />
         </Grid.Column>
