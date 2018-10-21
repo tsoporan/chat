@@ -28,11 +28,10 @@ class App extends Component {
     const { online } = this.state;
 
     return (
-      <AppRouter>
-        <Container fluid>
-          <AppHeader online={online} />
-        </Container>
-      </AppRouter>
+      <Container fluid style={{ height: "100%" }}>
+        <AppHeader online={online} />
+        <AppRouter />
+      </Container>
     );
   }
 }

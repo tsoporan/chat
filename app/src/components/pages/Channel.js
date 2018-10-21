@@ -14,14 +14,14 @@ function Channel(props) {
   const { match } = props;
 
   return (
-    <Grid padded>
+    <Grid stackable padded>
       <Grid.Row>
         <Grid.Column>
           <ChannelHeader />
         </Grid.Column>
       </Grid.Row>
 
-      <Grid.Row>
+      <Grid.Row style={{ height: "calc(100vh - 220px)" }}>
         <Grid.Column width={12}>
           <ChannelMessages />
         </Grid.Column>
@@ -31,7 +31,7 @@ function Channel(props) {
       </Grid.Row>
 
       <Grid.Row>
-        <Grid.Column>
+        <Grid.Column verticalAlign="bottom">
           <ChannelMessageBox />
         </Grid.Column>
       </Grid.Row>
